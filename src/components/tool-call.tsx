@@ -2,7 +2,7 @@ import { TranslationBundle } from '@jupyterlab/translation';
 
 import * as React from 'react';
 
-import { IToolCallMetadata, ToolCallApproval, ToolCallStatus } from '../token';
+import { ToolCallApproval } from '../token';
 
 /**
  * Configuration for rendering tool call status.
@@ -12,6 +12,17 @@ interface IStatusConfig {
   statusClass: string;
   open?: boolean;
 }
+
+/**
+ * Tool call status types.
+ */
+export type ToolCallStatus =
+  | 'pending'
+  | 'awaiting_approval'
+  | 'approved'
+  | 'rejected'
+  | 'completed'
+  | 'error';
 
 const STATUS_CONFIG: Record<ToolCallStatus, IStatusConfig> = {
   pending: {
@@ -44,9 +55,22 @@ const STATUS_CONFIG: Record<ToolCallStatus, IStatusConfig> = {
 /**
  * Options for building tool call HTML.
  */
-export interface IToolCallHtmlOptions extends IToolCallMetadata {
+export interface IToolCallMetadata {
+  toolName: string;
+  input: string;
+  status: ToolCallStatus;
+  summary?: string;
+  output?: string;
+  targetId?: string;
+  approvalId?: string;
+}
+
+/**
+ * Options for building tool call HTML.
+ */
+export interface IToolCallProps extends IToolCallMetadata {
   trans: TranslationBundle;
-  toolCallApproval: ToolCallApproval;
+  toolCallApproval?: ToolCallApproval;
 }
 
 export function escapeHtml(value: string): string {
@@ -91,11 +115,6 @@ const getStatusText = (
 };
 
 /**
- * React component props for ToolCall.
- */
-export interface IToolCallProps extends IToolCallHtmlOptions {}
-
-/**
  * React functional component for displaying a tool call.
  *
  * Renders a collapsible details element showing tool execution information
@@ -116,6 +135,12 @@ export const ToolCall: React.FC<IToolCallProps> = ({
   const statusText = getStatusText(status, trans);
   const resultLabel =
     status === 'error' ? trans.__('Error') : trans.__('Result');
+
+  if (status === 'awaiting_approval' && !toolCallApproval) {
+    console.error(
+      'The tool call has no approval function, approval, it will not work as expected'
+    );
+  }
 
   return (
     <details

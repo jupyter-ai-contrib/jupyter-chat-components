@@ -27,27 +27,3 @@ export interface IComponentsRendererFactory
    */
   toolCallApproval: ToolCallApproval;
 }
-
-/**
- * Tool call status types.
- */
-export type ToolCallStatus =
-  | 'pending'
-  | 'awaiting_approval'
-  | 'approved'
-  | 'rejected'
-  | 'completed'
-  | 'error';
-
-/**
- * Options for building tool call HTML.
- */
-export interface IToolCallMetadata {
-  toolName: string;
-  input: string;
-  status: ToolCallStatus;
-  summary?: string;
-  output?: string;
-  targetId?: string;
-  approvalId?: string;
-}

@@ -4,16 +4,17 @@ import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 
 import { ReactWidget } from '@jupyterlab/ui-components';
 
+import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+
 import * as React from 'react';
 
 import {
-  IComponentsRendererFactory,
   IToolCallMetadata,
-  ToolCallApproval
-} from './token';
+  IToolCallProps,
+  ToolCall
+} from './components/tool-call';
 
-import { IToolCallHtmlOptions, ToolCall } from './components/tool-call';
-import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
+import { IComponentsRendererFactory, ToolCallApproval } from './token';
 
 /**
  * The default mime type for the extension.
@@ -36,7 +37,7 @@ interface IComponentsRendererOptions extends IRenderMime.IRendererOptions {
   /**
    * The callback to approve or reject a tool.
    */
-  toolCallApproval: ToolCallApproval;
+  toolCallApproval?: ToolCallApproval;
 }
 
 /**
@@ -68,7 +69,7 @@ export class ComponentsRenderer
 
   protected render(): ReactRenderElement | null {
     if (this._data === 'tool-call') {
-      const toolCallOptions: IToolCallHtmlOptions = {
+      const toolCallOptions: IToolCallProps = {
         ...(this._metadata as unknown as IToolCallMetadata),
         trans: this._trans,
         toolCallApproval: this._toolCallApproval
@@ -80,7 +81,7 @@ export class ComponentsRenderer
 
   private _trans: TranslationBundle;
   private _mimeType: string;
-  private _toolCallApproval: ToolCallApproval;
+  private _toolCallApproval?: ToolCallApproval;
   private _data: string | null = null;
   private _metadata: ReadonlyPartialJSONValue | null = null;
 }

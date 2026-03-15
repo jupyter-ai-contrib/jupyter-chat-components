@@ -8,11 +8,7 @@ import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import * as React from 'react';
 
-import {
-  IToolCallMetadata,
-  IToolCallProps,
-  ToolCall
-} from './components/tool-call';
+import { IToolCallMetadata, IToolCallProps, ToolCall } from './components';
 
 import { IComponentsRendererFactory, ToolCallApproval } from './token';
 
@@ -41,7 +37,7 @@ interface IComponentsRendererOptions extends IRenderMime.IRendererOptions {
 }
 
 /**
- * A widget for rendering .
+ * A widget for rendering components from mime bundle.
  */
 export class ComponentsRenderer
   extends ReactWidget

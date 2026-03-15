@@ -2,7 +2,37 @@
 
 [![Github Actions Status](https://github.com/brichet/jupyter-chat-components/workflows/Build/badge.svg)](https://github.com/brichet/jupyter-chat-components/actions/workflows/build.yml)
 
-Components to displayed in jupyter chat
+A library of React components designed for use in Jupyter chat interfaces, with a focus on AI-powered interactions. These components are intended to be integrated into JupyterLab extensions that provide chat functionality.
+
+## Component registry
+
+This extension provides a `IComponentRegistry` token that other JupyterLab extensions can consume to register or retrieve React components by name. The registry exposes the following methods:
+
+- `add(name, component)` — register a new React component under a unique name
+- `get(name)` — retrieve a registered component by name
+- `has(name)` — check whether a component is registered
+- `getNames()` — list all registered component names
+
+This makes the system extensible: third-party extensions can add their own components to the registry.
+
+## MIME renderer
+
+Components are exposed through a custom MIME type: `application/vnd.jupyter.chat.components`.
+
+This extension registers a MIME renderer factory with JupyterLab's render MIME registry. To display a component, produce output with the MIME type above, where:
+
+- the **data** value is the component name (e.g. `"tool-call"`)
+- the **metadata** contains the props to pass to the component
+
+Any JupyterLab extension can then render chat components in notebook outputs or chat messages by emitting that MIME type.
+
+## Available components
+
+### `tool-call`
+
+Renders an AI tool call, displaying the tool name, input arguments, and output in a structured and readable format. Useful for visualizing function calls made by AI assistants during a conversation.
+
+More components are planned for future releases.
 
 ## Requirements
 

@@ -62,7 +62,10 @@ export class ComponentsRenderer
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     this._data = model.data[this._mimeType] as string;
-    this._metadata = { ...model.metadata };
+    const metadata = model.metadata;
+    this._metadata = (metadata[this._mimeType] as ReadonlyPartialJSONValue) ?? {
+      ...metadata
+    };
     return this.update();
   }
 

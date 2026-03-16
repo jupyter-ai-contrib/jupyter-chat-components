@@ -82,22 +82,38 @@
 }
 
 .jp-ai-tool-status-pending {
-  background: rgb(var(--jp-warn-color1-rgb) / 15%);
+  background: color-mix(
+    in srgb,
+    var(--jp-warn-color1, #f57c00) 15%,
+    transparent
+  );
   color: var(--jp-warn-color1);
 }
 
 .jp-ai-tool-status-completed {
-  background: rgb(var(--jp-success-color1-rgb) / 15%);
+  background: color-mix(
+    in srgb,
+    var(--jp-success-color1, #388e3c) 15%,
+    transparent
+  );
   color: var(--jp-success-color1);
 }
 
 .jp-ai-tool-status-error {
-  background: rgb(var(--jp-error-color1-rgb) / 15%);
+  background: color-mix(
+    in srgb,
+    var(--jp-error-color1, #d32f2f) 15%,
+    transparent
+  );
   color: var(--jp-error-color1);
 }
 
 .jp-ai-tool-status-approval {
-  background: rgb(var(--jp-warn-color1-rgb) / 15%);
+  background: color-mix(
+    in srgb,
+    var(--jp-warn-color1, #f57c00) 15%,
+    transparent
+  );
   color: var(--jp-warn-color1);
 }
 
@@ -204,4 +220,106 @@
 .jp-ai-approval-btn:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* Inline Diff */
+.jp-ai-inline-diff-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.jp-ai-inline-diff-block {
+  overflow: hidden;
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 6px;
+  background: var(--jp-layout-color0);
+}
+
+.jp-ai-inline-diff-header {
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color1);
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-ui-font-size0);
+  text-align: left;
+}
+
+.jp-ai-inline-diff-content {
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-code-font-size);
+  line-height: var(--jp-code-line-height);
+}
+
+.jp-ai-inline-diff-line {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 8px;
+  align-items: start;
+  padding: 0 10px;
+  min-height: calc(var(--jp-code-line-height) * 1em);
+}
+
+.jp-ai-inline-diff-line-prefix {
+  width: 1ch;
+  color: var(--jp-ui-font-color3);
+  user-select: none;
+  text-align: center;
+}
+
+.jp-ai-inline-diff-line-text {
+  min-width: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.jp-ai-inline-diff-line-text:empty::before {
+  content: '·';
+  opacity: 0.35;
+}
+
+.jp-ai-inline-diff-line.jp-mod-added {
+  background: color-mix(
+    in srgb,
+    var(--jp-success-color1, #388e3c) 15%,
+    transparent
+  );
+}
+
+.jp-ai-inline-diff-line.jp-mod-removed {
+  background: color-mix(
+    in srgb,
+    var(--jp-error-color1, #d32f2f) 15%,
+    transparent
+  );
+}
+
+.jp-ai-inline-diff-line.jp-mod-context {
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-ai-inline-diff-empty {
+  padding: 6px 10px;
+  color: var(--jp-ui-font-color2);
+  font-style: italic;
+}
+
+.jp-ai-inline-diff-toggle {
+  padding: 4px 10px 8px;
+  border: none;
+  background: none;
+  color: var(--jp-ui-font-color2);
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size0);
+  font-style: italic;
+  cursor: pointer;
+  text-align: left;
+}
+
+.jp-ai-inline-diff-toggle:hover {
+  color: var(--jp-ui-font-color1);
+  text-decoration: underline;
 }

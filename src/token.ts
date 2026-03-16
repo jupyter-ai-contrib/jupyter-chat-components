@@ -82,3 +82,19 @@ export interface IComponentProps {
    */
   trans: TranslationBundle;
 }
+
+/**
+ * A single file diff entry.
+ */
+export interface IInlineDiff {
+  path: string;
+  newText: string;
+  oldText?: string;
+}
+
+/**
+ * Metadata for rendering inline diffs.
+ */
+export interface IInlineDiffMetadata {
+  diffs: IInlineDiff[];
+}

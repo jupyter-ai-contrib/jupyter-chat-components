@@ -13,14 +13,6 @@ export const IComponentsRendererFactory = new Token<IComponentsRendererFactory>(
 );
 
 /**
- * The token providing the chat components registry.
- */
-export const IComponentRegistry = new Token<IComponentRegistry>(
-  'jupyter-chat-components:IComponentRegistry',
-  'The chat components registry'
-);
-
-/**
  * The callback to approve or reject a tool.
  */
 export type ToolCallApproval =
@@ -32,6 +24,11 @@ export type ToolCallApproval =
  */
 export interface IComponentsRendererFactory
   extends IRenderMime.IRendererFactory {
+  /**
+   * The registry of React components available for rendering.
+   */
+  registry: IComponentRegistry;
+
   /**
    * The callback to approve or reject a tool.
    */

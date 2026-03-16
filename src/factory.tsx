@@ -8,9 +8,15 @@ import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import * as React from 'react';
 
-import { IToolCallMetadata, IToolCallProps, ToolCall } from './components';
+import { ToolCall } from './components';
 
-import { IComponentsRendererFactory, ToolCallApproval } from './token';
+import { ComponentRegistry } from './registry';
+
+import {
+  IComponentRegistry,
+  IComponentsRendererFactory,
+  ToolCallApproval
+} from './token';
 
 /**
  * The default mime type for the extension.
@@ -34,6 +40,11 @@ interface IComponentsRendererOptions extends IRenderMime.IRendererOptions {
    * The callback to approve or reject a tool.
    */
   toolCallApproval?: ToolCallApproval;
+
+  /**
+   * The component registry.
+   */
+  registry: IComponentRegistry;
 }
 
 /**
@@ -51,6 +62,7 @@ export class ComponentsRenderer
     this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this._mimeType = options.mimeType;
     this._toolCallApproval = options.toolCallApproval;
+    this._registry = options.registry;
     this.addClass(CLASS_NAME);
   }
 
@@ -64,20 +76,26 @@ export class ComponentsRenderer
   }
 
   protected render(): ReactRenderElement | null {
-    if (this._data === 'tool-call') {
-      const toolCallOptions: IToolCallProps = {
-        ...(this._metadata as unknown as IToolCallMetadata),
-        trans: this._trans,
-        toolCallApproval: this._toolCallApproval
-      };
-      return <ToolCall {...toolCallOptions} />;
+    if (!this._data) {
+      return null;
     }
-    return null;
+    const Component = this._registry.get(this._data);
+    if (!Component) {
+      return null;
+    }
+    return (
+      <Component
+        {...(this._metadata as any)}
+        trans={this._trans}
+        toolCallApproval={this._toolCallApproval}
+      />
+    );
   }
 
   private _trans: TranslationBundle;
   private _mimeType: string;
   private _toolCallApproval?: ToolCallApproval;
+  private _registry: IComponentRegistry;
   private _data: string | null = null;
   private _metadata: ReadonlyPartialJSONValue | null = null;
 }
@@ -89,11 +107,19 @@ export class RendererFactory implements IComponentsRendererFactory {
   readonly safe = true;
   readonly mimeTypes = [MIME_TYPE];
   readonly defaultRank = 100;
+  readonly registry: ComponentRegistry;
   toolCallApproval: ToolCallApproval = null;
+
+  constructor() {
+    this.registry = new ComponentRegistry();
+    this.registry.add('tool-call', ToolCall);
+  }
+
   createRenderer = (options: IRenderMime.IRendererOptions) => {
     return new ComponentsRenderer({
       ...options,
-      toolCallApproval: this.toolCallApproval
+      toolCallApproval: this.toolCallApproval,
+      registry: this.registry
     });
   };
 }

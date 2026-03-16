@@ -2,7 +2,7 @@ import { TranslationBundle } from '@jupyterlab/translation';
 
 import * as React from 'react';
 
-import { ToolCallApproval } from '../token';
+import { IComponentProps, ToolCallApproval } from '../token';
 
 /**
  * Configuration for rendering tool call status.
@@ -68,8 +68,7 @@ export interface IToolCallMetadata {
 /**
  * Options for building tool call HTML.
  */
-export interface IToolCallProps extends IToolCallMetadata {
-  trans: TranslationBundle;
+export interface IToolCallProps extends IComponentProps, IToolCallMetadata {
   toolCallApproval?: ToolCallApproval;
 }
 

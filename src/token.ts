@@ -1,5 +1,7 @@
 import { IRenderMime } from '@jupyterlab/rendermime-interfaces';
 
+import { TranslationBundle } from '@jupyterlab/translation';
+
 import { Token } from '@lumino/coreutils';
 
 import * as React from 'react';
@@ -69,4 +71,14 @@ export interface IComponentRegistry {
    * @returns Array of component names
    */
   getNames(): string[];
+}
+
+/**
+ * The minimal required properties for the component.
+ */
+export interface IComponentProps {
+  /**
+   * The translation bundle.
+   */
+  trans: TranslationBundle;
 }

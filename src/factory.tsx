@@ -86,13 +86,14 @@ export class ComponentsRenderer
     if (!Component) {
       return null;
     }
-    return (
-      <Component
-        {...(this._metadata as any)}
-        trans={this._trans}
-        toolCallApproval={this._toolCallApproval}
-      />
-    );
+
+    const componentsProps = { ...(this._metadata as any) };
+
+    if (this._data === 'tool-call') {
+      componentsProps.toolCallApproval = this._toolCallApproval;
+    }
+
+    return <Component {...componentsProps} trans={this._trans} />;
   }
 
   private _trans: TranslationBundle;

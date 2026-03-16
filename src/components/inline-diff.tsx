@@ -1,3 +1,4 @@
+import { PathExt } from '@jupyterlab/coreutils';
 import { nullTranslator, TranslationBundle } from '@jupyterlab/translation';
 
 import * as React from 'react';
@@ -25,6 +26,10 @@ export interface IInlineDiffRenderOptions extends IInlineDiffMetadata {
 
 export interface IInlineDiffProps extends IInlineDiffMetadata {
   trans?: TranslationBundle;
+}
+
+export function getDiffFilename(path: string): string {
+  return PathExt.basename(path);
 }
 
 function toLineInfo(
@@ -104,7 +109,7 @@ function DiffBlock({
   diff: IInlineDiff;
   trans: TranslationBundle;
 }): JSX.Element {
-  const filename = diff.path.split('/').pop() ?? diff.path;
+  const filename = getDiffFilename(diff.path);
   const [expanded, setExpanded] = React.useState(false);
   const allLines = buildDiffLines(diff);
   const canTruncate = allLines.length > MAX_DIFF_LINES;

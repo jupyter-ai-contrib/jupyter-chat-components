@@ -5,7 +5,11 @@ import * as React from 'react';
 import { structuredPatch } from 'diff';
 import type { StructuredPatchHunk } from 'diff';
 
-import { IInlineDiff, IInlineDiffMetadata } from '../token';
+import {
+  IInlineDiff,
+  IInlineDiffMetadata,
+  IInlineDiffNotebookCellTarget
+} from '../token';
 
 /** Maximum number of rendered lines before truncation. */
 const MAX_DIFF_LINES = 20;
@@ -23,6 +27,65 @@ export interface IInlineDiffProps extends IInlineDiffMetadata {
 
 export function getDiffFilename(path: string): string {
   return PathExt.basename(path);
+}
+
+function getNotebookCellLabel(target: IInlineDiffNotebookCellTarget): string {
+  if (typeof target.cellIndex === 'number') {
+    return `Cell ${target.cellIndex + 1}`;
+  }
+
+  if (target.cellId) {
+    return `Cell ${target.cellId}`;
+  }
+
+  return 'Notebook Cell';
+}
+
+function getInlineDiffPatchPath(diff: IInlineDiff): string {
+  const target = diff.target;
+
+  if (target.kind === 'file') {
+    return target.path;
+  }
+
+  return [target.notebookPath, target.cellId ?? target.cellIndex]
+    .filter(value => value !== undefined && value !== '')
+    .join('#');
+}
+
+export function getInlineDiffLabel(diff: IInlineDiff): string {
+  if (diff.label) {
+    return diff.label;
+  }
+
+  const target = diff.target;
+
+  if (target.kind === 'file') {
+    return getDiffFilename(target.path);
+  }
+
+  const notebookName = getDiffFilename(target.notebookPath);
+  const cellLabel = getNotebookCellLabel(target);
+
+  return [notebookName, cellLabel].join(' · ');
+}
+
+export function getInlineDiffTitle(diff: IInlineDiff): string {
+  const target = diff.target;
+
+  if (target.kind === 'file') {
+    return target.path;
+  }
+
+  const cellLabel = getNotebookCellLabel(target);
+  const cellIdLabel =
+    typeof target.cellIndex === 'number' && target.cellId
+      ? `Cell ID ${target.cellId}`
+      : null;
+
+  return [target.notebookPath, cellLabel, cellIdLabel]
+    .filter(part => part !== null && part !== undefined && part !== '')
+    .join(' · ');
 }
 
 function toLineInfo(
@@ -79,9 +142,10 @@ function buildDiffLinesFromHunk(
 }
 
 function buildDiffLines(diff: IInlineDiff): IDiffLineInfo[] {
+  const patchPath = getInlineDiffPatchPath(diff);
   const patch = structuredPatch(
-    diff.path,
-    diff.path,
+    patchPath,
+    patchPath,
     diff.oldText ?? '',
     diff.newText,
     undefined,
@@ -102,7 +166,8 @@ function DiffBlock({
   diff: IInlineDiff;
   trans: TranslationBundle;
 }): JSX.Element {
-  const filename = getDiffFilename(diff.path);
+  const filename = getInlineDiffLabel(diff);
+  const title = getInlineDiffTitle(diff);
   const [expanded, setExpanded] = React.useState(false);
   const allLines = React.useMemo(() => buildDiffLines(diff), [diff]);
   const canTruncate = allLines.length > MAX_DIFF_LINES;
@@ -112,7 +177,7 @@ function DiffBlock({
 
   return (
     <div className="jp-ai-inline-diff-block">
-      <div className="jp-ai-inline-diff-header" title={diff.path}>
+      <div className="jp-ai-inline-diff-header" title={title}>
         {filename}
       </div>
       <div className="jp-ai-inline-diff-content">
@@ -157,7 +222,7 @@ function DiffBlock({
 }
 
 /**
- * React component for rendering one or more inline file diffs.
+ * React component for rendering one or more inline diffs.
  */
 export const InlineDiff: React.FC<IInlineDiffProps> = ({ diffs, trans }) => {
   const transBundle = trans ?? nullTranslator.load('jupyterlab');
@@ -166,7 +231,7 @@ export const InlineDiff: React.FC<IInlineDiffProps> = ({ diffs, trans }) => {
     <div className="jp-ai-inline-diff-container">
       {diffs.map((diff, index) => (
         <DiffBlock
-          key={`${diff.path}-${index}`}
+          key={`${getInlineDiffPatchPath(diff)}-${index}`}
           diff={diff}
           trans={transBundle}
         />

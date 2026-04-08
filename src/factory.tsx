@@ -8,15 +8,22 @@ import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
 import * as React from 'react';
 
-import { InlineDiff, MessageQueue, ToolCall } from './components';
+import {
+  GroupedToolCalls,
+  InlineDiff,
+  MessageQueue,
+  ToolCall
+} from './components';
 
 import { ComponentRegistry } from './registry';
 
 import {
   IComponentRegistry,
   IComponentsRendererFactory,
+  OpenToolCallPath,
   RemoveQueuedMessage,
-  ToolCallApproval
+  ToolCallApproval,
+  ToolCallPermissionDecision
 } from './token';
 
 /**
@@ -48,6 +55,16 @@ interface IComponentsRendererOptions extends IRenderMime.IRendererOptions {
   removeQueuedMessage?: RemoveQueuedMessage;
 
   /**
+   * The callback to submit a permission decision for grouped tool calls.
+   */
+  toolCallPermissionDecision?: ToolCallPermissionDecision;
+
+  /**
+   * The callback to open a path referenced by grouped tool calls.
+   */
+  openToolCallPath?: OpenToolCallPath;
+
+  /**
    * The component registry.
    */
   registry: IComponentRegistry;
@@ -69,6 +86,8 @@ export class ComponentsRenderer
     this._mimeType = options.mimeType;
     this._toolCallApproval = options.toolCallApproval;
     this._removeQueuedMessage = options.removeQueuedMessage;
+    this._toolCallPermissionDecision = options.toolCallPermissionDecision;
+    this._openToolCallPath = options.openToolCallPath;
     this._registry = options.registry;
     this.addClass(CLASS_NAME);
   }
@@ -104,6 +123,12 @@ export class ComponentsRenderer
       componentsProps.removeQueuedMessage = this._removeQueuedMessage;
     }
 
+    if (this._data === 'grouped-tool-calls') {
+      componentsProps.toolCallPermissionDecision =
+        this._toolCallPermissionDecision;
+      componentsProps.openToolCallPath = this._openToolCallPath;
+    }
+
     return <Component {...componentsProps} trans={this._trans} />;
   }
 
@@ -111,6 +136,8 @@ export class ComponentsRenderer
   private _mimeType: string;
   private _toolCallApproval?: ToolCallApproval;
   private _removeQueuedMessage?: RemoveQueuedMessage;
+  private _toolCallPermissionDecision?: ToolCallPermissionDecision;
+  private _openToolCallPath?: OpenToolCallPath;
   private _registry: IComponentRegistry;
   private _data: string | null = null;
   private _metadata: ReadonlyPartialJSONValue | null = null;
@@ -126,10 +153,13 @@ export class RendererFactory implements IComponentsRendererFactory {
   readonly registry: ComponentRegistry;
   toolCallApproval: ToolCallApproval = null;
   removeQueuedMessage: RemoveQueuedMessage = null;
+  toolCallPermissionDecision: ToolCallPermissionDecision = null;
+  openToolCallPath: OpenToolCallPath = null;
 
   constructor() {
     this.registry = new ComponentRegistry();
     this.registry.add('tool-call', ToolCall);
+    this.registry.add('grouped-tool-calls', GroupedToolCalls);
     this.registry.add('inline-diff', InlineDiff);
     this.registry.add('message-queue', MessageQueue);
   }
@@ -139,6 +169,8 @@ export class RendererFactory implements IComponentsRendererFactory {
       ...options,
       toolCallApproval: this.toolCallApproval,
       removeQueuedMessage: this.removeQueuedMessage,
+      toolCallPermissionDecision: this.toolCallPermissionDecision,
+      openToolCallPath: this.openToolCallPath,
       registry: this.registry
     });
   };

@@ -22,11 +22,27 @@ export type ToolCallApproval =
   | null;
 
 /**
+ * The callback to submit a tool-call permission decision.
+ */
+export type ToolCallPermissionDecision =
+  | ((
+      sessionId: string,
+      toolCallId: string,
+      optionId: string
+    ) => Promise<void> | void)
+  | null;
+
+/**
  * The callback to remove a queued message.
  */
 export type RemoveQueuedMessage =
   | ((targetId: string, messageId: string) => void)
   | null;
+
+/**
+ * The callback to open a file or resource path referenced by a tool call.
+ */
+export type OpenToolCallPath = ((path: string) => void) | null;
 
 /**
  * The interface for components renderer factory.
@@ -47,6 +63,16 @@ export interface IComponentsRendererFactory
    * The callback to remove a queued message.
    */
   removeQueuedMessage: RemoveQueuedMessage;
+
+  /**
+   * The callback to submit a permission decision for grouped tool calls.
+   */
+  toolCallPermissionDecision: ToolCallPermissionDecision;
+
+  /**
+   * The callback to open a path referenced by grouped tool calls.
+   */
+  openToolCallPath: OpenToolCallPath;
 }
 
 /**
@@ -93,6 +119,106 @@ export interface IComponentProps {
    * The translation bundle.
    */
   trans: TranslationBundle;
+}
+
+/**
+ * A file diff entry for grouped tool calls.
+ */
+export interface IToolCallDiff {
+  /**
+   * Path of the file being diffed.
+   */
+  path: string;
+  /**
+   * Updated text content.
+   */
+  newText: string;
+  /**
+   * Previous text content.
+   */
+  oldText?: string;
+}
+
+/**
+ * A permission option for grouped tool calls.
+ */
+export interface IToolCallPermissionOption {
+  /**
+   * Stable permission option identifier.
+   */
+  optionId: string;
+  /**
+   * Human-readable button label.
+   */
+  name: string;
+  /**
+   * Optional semantic option kind, such as allow_once or reject_once.
+   */
+  kind?: string;
+}
+
+/**
+ * A single grouped tool call entry.
+ */
+export interface IToolCallsEntry {
+  /**
+   * Unique tool call identifier.
+   */
+  toolCallId: string;
+  /**
+   * Human-readable title displayed in the UI.
+   */
+  title?: string;
+  /**
+   * Tool operation category.
+   */
+  kind?: string;
+  /**
+   * Current tool call status.
+   */
+  status?: string;
+  /**
+   * Tool input payload.
+   */
+  rawInput?: unknown;
+  /**
+   * Tool output payload.
+   */
+  rawOutput?: unknown;
+  /**
+   * File paths or resource locations referenced by the tool call.
+   */
+  locations?: string[];
+  /**
+   * Permission options presented to the user.
+   */
+  permissionOptions?: IToolCallPermissionOption[];
+  /**
+   * Permission request lifecycle state.
+   */
+  permissionStatus?: 'pending' | 'resolved';
+  /**
+   * Selected permission option identifier.
+   */
+  selectedOptionId?: string;
+  /**
+   * Session identifier used to route permission decisions.
+   */
+  sessionId?: string;
+  /**
+   * Optional inline file diffs associated with the tool call.
+   */
+  diffs?: IToolCallDiff[];
+}
+
+/**
+ * Metadata for rendering grouped tool calls.
+ */
+export interface IToolCallsMetadata {
+  /**
+   * List of tool call entries.
+   */
+  toolCalls: IToolCallsEntry[];
 }
 
 /**

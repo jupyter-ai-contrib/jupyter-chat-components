@@ -26,54 +26,7 @@ The registry is available directly on the `IComponentsRendererFactory` token as 
 
 Other JupyterLab extensions can consume the `IComponentsRendererFactory` token and use `registry.add()` to register their own components, which will then be available for rendering via the MIME bundle.
 
-For end-to-end metadata examples, see the demo notebook at [demo/contents/components_demo.ipynb](./demo/contents/components_demo.ipynb). It currently serves as the main component reference.
-
-## Available components
-
-The renderer factory registers these built-in components by default:
-
-### `tool-call`
-
-Renders an AI tool call, displaying the tool name, input arguments, and output in a structured and readable format. Useful for visualizing function calls made by AI assistants during a conversation.
-
-### `grouped-tool-calls`
-
-Renders grouped tool calls, including:
-
-- grouped in-progress, completed, and failed tool rows
-- expandable raw output and file path details
-- inline file diffs for edit operations
-- permission options for approval flows
-
-The component uses a camelCase metadata API.
-
-If your host extension wants the approval buttons to be interactive, set the renderer factory callbacks:
-
-```ts
-rendererFactory.toolCallPermissionDecision = async (
-  sessionId,
-  toolCallId,
-  optionId
-) => {
-  // submit the decision to your backend
-};
-
-rendererFactory.openToolCallPath = path => {
-  // optionally open the referenced file or resource
-};
-```
-
-### `inline-diff`
-
-Renders one or more inline diffs directly in chat output. It supports regular file diffs and notebook cell diffs, derives sensible labels from structured targets, and truncates long diffs with an expand/collapse control.
-
-The component uses a `diffs` metadata array. Each diff item includes a structured `target`, `newText`, and optional `oldText` and `label`.
-
-### `message-queue`
-
-Renders queued chat messages as bubbles. This is useful for showing pending assistant messages or other messages that have not yet been committed to the main transcript.
-
-The component uses `messages` metadata and optionally accepts a `targetId`. If your host extension sets `rendererFactory.removeQueuedMessage`, each queued message can expose a remove action.
+For live end-to-end metadata examples, see the deployed demo notebook at [brichet.github.io/jupyter-chat-components/lab/index.html?path=components_demo.ipynb](https://brichet.github.io/jupyter-chat-components/lab/index.html?path=components_demo.ipynb). The source notebook lives at [demo/contents/components_demo.ipynb](./demo/contents/components_demo.ipynb).
 
 ## Requirements
 

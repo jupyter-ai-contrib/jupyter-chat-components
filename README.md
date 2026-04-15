@@ -26,38 +26,7 @@ The registry is available directly on the `IComponentsRendererFactory` token as 
 
 Other JupyterLab extensions can consume the `IComponentsRendererFactory` token and use `registry.add()` to register their own components, which will then be available for rendering via the MIME bundle.
 
-## Available components
-
-### `tool-call`
-
-Renders an AI tool call, displaying the tool name, input arguments, and output in a structured and readable format. Useful for visualizing function calls made by AI assistants during a conversation.
-
-### `grouped-tool-calls`
-
-Renders grouped tool calls, including:
-
-- grouped in-progress, completed, and failed tool rows
-- expandable raw output and file path details
-- inline file diffs for edit operations
-- permission options for approval flows
-
-The component uses a camelCase metadata API.
-
-If your host extension wants the approval buttons to be interactive, set the renderer factory callbacks:
-
-```ts
-rendererFactory.toolCallPermissionDecision = async (
-  sessionId,
-  toolCallId,
-  optionId
-) => {
-  // submit the decision to your backend
-};
-
-rendererFactory.openToolCallPath = path => {
-  // optionally open the referenced file or resource
-};
-```
+For live end-to-end metadata examples, see the deployed demo notebook at [brichet.github.io/jupyter-chat-components/lab/index.html?path=components_demo.ipynb](https://brichet.github.io/jupyter-chat-components/lab/index.html?path=components_demo.ipynb). The source notebook lives at [demo/contents/components_demo.ipynb](./demo/contents/components_demo.ipynb).
 
 ## Requirements
 

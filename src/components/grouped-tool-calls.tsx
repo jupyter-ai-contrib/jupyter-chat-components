@@ -17,6 +17,9 @@ import {
 /** Maximum number of rendered diff lines before truncation. */
 const MAX_DIFF_LINES = 20;
 
+/** Maximum number of lines shown in an expanded detail. */
+const MAX_DETAIL_LINES = 15;
+
 /** Tool kinds where expanded view shows file paths from locations. */
 const FILE_KINDS = new Set(['read', 'edit', 'delete', 'move']);
 
@@ -348,6 +351,91 @@ function buildDiffLines(diff: IToolCallDiff): IDiffLineInfo[] {
   }, []);
 }
 
+/**
+ * A component for details, default to 15 rows but expandable.
+ */
+function ToolCallDetail({
+  children,
+  trans
+}: {
+  children: React.ReactNode;
+  trans: TranslationBundle;
+}): JSX.Element {
+  const [expanded, setExpanded] = React.useState(false);
+  const [isOverflowing, setIsOverflowing] = React.useState(false);
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  // Ensure the detail is collapsed when opening it.
+  React.useEffect(() => {
+    const details = containerRef.current?.closest('details');
+    if (!details) {
+      return;
+    }
+    const handleToggle = () => {
+      if (!details.open) {
+        setExpanded(false);
+      }
+    };
+    details.addEventListener('toggle', handleToggle);
+    return () => details.removeEventListener('toggle', handleToggle);
+  }, []);
+
+  React.useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el) {
+      return;
+    }
+
+    const measure = () => {
+      if (!expanded) {
+        setIsOverflowing(el.scrollHeight > el.clientHeight);
+      }
+    };
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    measure();
+
+    return () => observer.disconnect();
+  }, [expanded]);
+
+  return (
+    <>
+      <div
+        ref={containerRef}
+        style={
+          expanded
+            ? undefined
+            : {
+                maxHeight: `calc(${MAX_DETAIL_LINES} * var(--jp-content-line-height) * var(--jp-ui-font-size1))`,
+                overflowY: 'auto'
+              }
+        }
+      >
+        {children}
+      </div>
+      {!expanded && isOverflowing && (
+        <button
+          className="jp-ai-tool-call-diff-toggle"
+          onClick={() => setExpanded(true)}
+          type="button"
+        >
+          {trans.__('Show all')}
+        </button>
+      )}
+      {expanded && (
+        <button
+          className="jp-ai-tool-call-diff-toggle"
+          onClick={() => setExpanded(false)}
+          type="button"
+        >
+          {trans.__('Show less')}
+        </button>
+      )}
+    </>
+  );
+}
+
 function ToolCallDiffBlock({
   diff,
   trans,
@@ -645,9 +733,11 @@ function ToolCallRow({
             openToolCallPath={openToolCallPath}
           />
         ) : (
-          <div className="jp-ai-tool-call-item-detail">
-            {detailLines.join('\n')}
-          </div>
+          <ToolCallDetail trans={trans}>
+            <div className="jp-ai-tool-call-item-detail">
+              {detailLines.join('\n')}
+            </div>
+          </ToolCallDetail>
         )}
       </details>
     );

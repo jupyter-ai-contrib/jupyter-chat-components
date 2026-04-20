@@ -284,11 +284,13 @@ details[open].jp-ai-tool-call-item summary::after,
 
 .jp-ai-tool-call-item-detail {
   margin: 2px 0 2px 20px;
-  font-size: var(--jp-code-font-size);
+  font-size: var(--jp-ui-font-size1);
   font-family: var(--jp-code-font-family);
   color: var(--jp-ui-font-color2);
   white-space: pre-wrap;
   word-break: break-all;
+  border-left: solid 1px var(--jp-ui-font-color2);
+  padding-left: 5px;
 }
 
 .jp-ai-tool-call-permission-buttons {

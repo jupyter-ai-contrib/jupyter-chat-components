@@ -642,11 +642,12 @@ function ToolCallRow({
   const selectedOption = toolCall.permissionOptions?.find(
     option => option.optionId === toolCall.selectedOptionId
   );
+  const status = toolCall.status ?? 'in_progress';
+
   const isRejected =
     toolCall.permissionStatus === 'resolved' &&
-    !!selectedOption?.kind?.includes('reject');
+    (!!selectedOption?.kind?.includes('reject') || status === 'rejected');
   const hasPendingPermission = toolCall.permissionStatus === 'pending';
-  const status = toolCall.status ?? 'in_progress';
   const isInProgress =
     !isRejected &&
     (status === 'in_progress' || status === 'pending' || hasPendingPermission);

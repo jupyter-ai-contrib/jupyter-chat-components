@@ -602,18 +602,35 @@ details[open].jp-ai-tool-call-item summary::after,
 /* Error Component Styling */
 .jp-ai-error-message {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: color-mix(in srgb, var(--jp-error-color1, #d32f2f) 15%, transparent);
-  border: 1px solid var(--jp-error-color1);
+  align-items: flex-start;
+  gap: 12px;
+  background-color: var(--jp-layout-color2);
+  border: 1px solid var(--jp-border-color1);
+  border-left: 4px solid var(--jp-error-color1);
   border-radius: 6px;
-  padding: 8px 12px;
-  margin: 4px 0;
+  padding: 12px 16px;
+  margin: 8px 0;
+  box-shadow: var(--jp-elevation-z2);
   color: var(--jp-ui-font-color1);
 }
 
 .jp-ai-error-icon {
-  font-size: 16px;
+  display: flex;
+  color: var(--jp-error-color1);
+  margin-top: 2px;
+}
+
+.jp-ai-error-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.jp-ai-error-title {
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 600;
+  color: var(--jp-error-color1);
 }
 
 .jp-ai-error-text {
@@ -621,4 +638,6 @@ details[open].jp-ai-tool-call-item summary::after,
   font-size: var(--jp-ui-font-size1);
   word-break: break-word;
   white-space: pre-wrap;
+  color: var(--jp-ui-font-color2);
+  line-height: 1.4;
 }

@@ -284,13 +284,11 @@ details[open].jp-ai-tool-call-item summary::after,
 
 .jp-ai-tool-call-item-detail {
   margin: 2px 0 2px 20px;
-  font-size: var(--jp-ui-font-size1);
+  font-size: var(--jp-code-font-size);
   font-family: var(--jp-code-font-family);
   color: var(--jp-ui-font-color2);
   white-space: pre-wrap;
   word-break: break-all;
-  border-left: solid 1px var(--jp-ui-font-color2);
-  padding-left: 5px;
 }
 
 .jp-ai-tool-call-permission-buttons {
@@ -599,4 +597,28 @@ details[open].jp-ai-tool-call-item summary::after,
 
 .jp-chat-message-queue-bubble:hover .jp-chat-message-queue-remove {
   opacity: 1;
+}
+
+/* Error Component Styling */
+.jp-ai-error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: color-mix(in srgb, var(--jp-error-color1, #d32f2f) 15%, transparent);
+  border: 1px solid var(--jp-error-color1);
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 4px 0;
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-ai-error-icon {
+  font-size: 16px;
+}
+
+.jp-ai-error-text {
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+  word-break: break-word;
+  white-space: pre-wrap;
 }

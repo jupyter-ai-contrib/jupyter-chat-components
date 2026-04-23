@@ -23,9 +23,6 @@ const MAX_DETAIL_LINES = 15;
 /** Tool kinds where expanded view shows file paths from locations. */
 const FILE_KINDS = new Set(['read', 'edit', 'delete', 'move']);
 
-/** Tool kinds where expanded view shows raw output. */
-const OUTPUT_KINDS = new Set(['search', 'execute', 'think', 'fetch']);
-
 const TOOL_KIND_LABELS: Record<string, string> = {
   read: 'Reading',
   edit: 'Editing',
@@ -91,26 +88,26 @@ export function toServerRelativePath(absolutePath: string): string {
 }
 
 /**
- * Format tool output for display.
+ * Format tool payload (input/output) for display.
  */
-export function formatToolCallOutput(rawOutput: unknown): string {
-  if (typeof rawOutput === 'string') {
-    return rawOutput;
+export function formatToolCallIO(payload: unknown): string {
+  if (typeof payload === 'string') {
+    return payload;
   }
 
   if (
-    Array.isArray(rawOutput) &&
-    rawOutput.every(
+    Array.isArray(payload) &&
+    payload.every(
       item =>
         typeof item === 'object' &&
         item !== null &&
         typeof (item as { text?: unknown }).text === 'string'
     )
   ) {
-    return rawOutput.map(item => (item as { text: string }).text).join('\n');
+    return payload.map(item => (item as { text: string }).text).join('\n');
   }
 
-  return JSON.stringify(rawOutput, null, 2);
+  return JSON.stringify(payload, null, 2);
 }
 
 /**
@@ -259,26 +256,17 @@ export function buildPermissionDetail(
 }
 
 /**
- * Build the expandable detail lines shown for completed and failed tool calls.
+ * Returns true when a completed/failed tool call has expandable detail content.
  */
-export function buildToolCallDetailsLines(toolCall: IToolCallsEntry): string[] {
-  const lines: string[] = [];
-  const { kind, locations, rawOutput } = toolCall;
+function hasDetailContent(toolCall: IToolCallsEntry): boolean {
+  const { kind, locations, rawInput, rawOutput } = toolCall;
+  const hasInput = rawInput !== null && rawInput !== undefined;
+  const hasOutput = rawOutput !== null && rawOutput !== undefined;
 
   if (kind && FILE_KINDS.has(kind) && locations?.length) {
-    lines.push(...locations.map(toServerRelativePath));
-  } else if (
-    kind &&
-    OUTPUT_KINDS.has(kind) &&
-    rawOutput !== null &&
-    rawOutput !== undefined
-  ) {
-    lines.push(formatToolCallOutput(rawOutput));
-  } else if (typeof rawOutput === 'string') {
-    lines.push(rawOutput);
+    return true;
   }
-
-  return lines;
+  return hasInput || hasOutput;
 }
 
 function toDiffLineInfo(
@@ -352,22 +340,23 @@ function buildDiffLines(diff: IToolCallDiff): IDiffLineInfo[] {
 }
 
 /**
- * A component for details, default to 15 rows but expandable.
+ * A labeled section with a capped height and show-all/show-less toggle.
  */
-function ToolCallDetail({
+function ToolCallSection({
+  label,
   children,
   trans
 }: {
+  label: string;
   children: React.ReactNode;
   trans: TranslationBundle;
 }): JSX.Element {
   const [expanded, setExpanded] = React.useState(false);
   const [isOverflowing, setIsOverflowing] = React.useState(false);
-  const containerRef = React.useRef<HTMLDivElement>(null);
+  const preRef = React.useRef<HTMLPreElement>(null);
 
-  // Ensure the detail is collapsed when opening it.
   React.useEffect(() => {
-    const details = containerRef.current?.closest('details');
+    const details = preRef.current?.closest('details');
     if (!details) {
       return;
     }
@@ -381,39 +370,35 @@ function ToolCallDetail({
   }, []);
 
   React.useLayoutEffect(() => {
-    const el = containerRef.current;
+    const el = preRef.current;
     if (!el) {
       return;
     }
-
     const measure = () => {
       if (!expanded) {
         setIsOverflowing(el.scrollHeight > el.clientHeight);
       }
     };
-
     const observer = new ResizeObserver(measure);
     observer.observe(el);
     measure();
-
     return () => observer.disconnect();
   }, [expanded]);
 
   return (
-    <>
-      <div
-        ref={containerRef}
-        style={
-          expanded
+    <div className="jp-ai-tool-call-detail-section">
+      <div className="jp-ai-tool-call-detail-label">{label}</div>
+      <pre
+        ref={preRef}
+        className="jp-ai-tool-call-detail-code"
+        style={{
+          maxHeight: expanded
             ? undefined
-            : {
-                maxHeight: `calc(${MAX_DETAIL_LINES} * var(--jp-content-line-height) * var(--jp-ui-font-size1))`,
-                overflowY: 'auto'
-              }
-        }
+            : `calc(${MAX_DETAIL_LINES} * var(--jp-content-line-height) * var(--jp-ui-font-size1))`
+        }}
       >
-        {children}
-      </div>
+        <code>{children}</code>
+      </pre>
       {!expanded && isOverflowing && (
         <button
           className="jp-ai-tool-call-diff-toggle"
@@ -432,7 +417,49 @@ function ToolCallDetail({
           {trans.__('Show less')}
         </button>
       )}
-    </>
+    </div>
+  );
+}
+
+/**
+ * Expandable detail view for a completed or failed tool call.
+ */
+function ToolCallDetail({
+  toolCall,
+  trans
+}: {
+  toolCall: IToolCallsEntry;
+  trans: TranslationBundle;
+}): JSX.Element {
+  const { kind, locations, rawInput, rawOutput } = toolCall;
+  const hasInput = rawInput !== null && rawInput !== undefined;
+  const hasOutput = rawOutput !== null && rawOutput !== undefined;
+
+  if (kind && FILE_KINDS.has(kind) && locations?.length) {
+    return (
+      <div className="jp-ai-tool-call-item-detail">
+        {locations.map((loc, i) => (
+          <div key={i} className="jp-ai-tool-call-item-detail-path">
+            {toServerRelativePath(loc)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="jp-ai-tool-call-item-detail">
+      {hasInput && (
+        <ToolCallSection label={trans.__('Input')} trans={trans}>
+          {formatToolCallIO(rawInput)}
+        </ToolCallSection>
+      )}
+      {hasOutput && (
+        <ToolCallSection label={trans.__('Output')} trans={trans}>
+          {formatToolCallIO(rawOutput)}
+        </ToolCallSection>
+      )}
+    </div>
   );
 }
 
@@ -729,11 +756,9 @@ function ToolCallRow({
     }
   }
 
-  const detailLines =
-    !hasDiffs && (isCompleted || isFailed)
-      ? buildToolCallDetailsLines(toolCall)
-      : [];
-  const hasExpandableContent = hasDiffs || detailLines.length > 0;
+  const hasExpandableContent =
+    hasDiffs ||
+    (!hasDiffs && (isCompleted || isFailed) && hasDetailContent(toolCall));
 
   if ((isCompleted || isFailed) && hasExpandableContent) {
     return (
@@ -758,11 +783,7 @@ function ToolCallRow({
             openToolCallPath={openToolCallPath}
           />
         ) : (
-          <ToolCallDetail trans={trans}>
-            <div className="jp-ai-tool-call-item-detail">
-              {detailLines.join('\n')}
-            </div>
-          </ToolCallDetail>
+          <ToolCallDetail toolCall={toolCall} trans={trans} />
         )}
       </details>
     );

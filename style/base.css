@@ -308,8 +308,38 @@ details[open].jp-ai-tool-call-item summary::after,
   color: var(--jp-ui-font-color2);
   white-space: pre-wrap;
   word-break: break-all;
-  border-left: solid 1px var(--jp-ui-font-color2);
   padding-left: 5px;
+}
+
+.jp-ai-tool-call-detail-section {
+  margin-bottom: 8px;
+}
+
+.jp-ai-tool-call-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.jp-ai-tool-call-detail-label {
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.jp-ai-tool-call-detail-code {
+  background: var(--jp-layout-color2);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 4px;
+  padding: 8px;
+  margin: 0;
+  font-size: var(--jp-ui-font-size1) !important;
+  overflow: auto;
+}
+
+.jp-ai-tool-call-detail-code code {
+  font-size: var(--jp-ui-font-size1) !important;
 }
 
 .jp-ai-tool-call-permission-buttons {

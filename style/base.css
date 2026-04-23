@@ -257,6 +257,25 @@ details.jp-ai-tool-call-item summary,
 .jp-ai-tool-call-item details summary {
   cursor: pointer;
   list-style: none;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--jp-layout-color1);
+  user-select: none;
+  gap: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.jp-ai-tool-call-item-title {
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 500;
+  flex: 1;
+}
+
+.jp-ai-tool-call-item-summary {
+  font-weight: 400;
+  opacity: 0.8;
+  font-size: var(--jp-ui-font-size0);
 }
 
 details.jp-ai-tool-call-item summary::-webkit-details-marker,

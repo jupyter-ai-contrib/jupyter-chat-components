@@ -670,7 +670,15 @@ function ToolCallRow({
         <details open>
           <summary>
             <span className="jp-ai-tool-call-item-icon">{icon}</span>{' '}
-            <em>{displayTitle}</em>
+            <div className="jp-ai-tool-call-item-title">
+              {displayTitle}
+              {toolCall.summary && (
+                <span className="jp-ai-tool-call-item-summary">
+                  {'  '}
+                  {toolCall.summary}
+                </span>
+              )}
+            </div>
           </summary>
           <ToolCallDiffView
             diffs={toolCall.diffs!}
@@ -697,7 +705,15 @@ function ToolCallRow({
           <details open>
             <summary>
               <span className="jp-ai-tool-call-item-icon">{icon}</span>{' '}
-              <em>{displayTitle}</em>
+              <div className="jp-ai-tool-call-item-title">
+                {displayTitle}
+                {toolCall.summary && (
+                  <span className="jp-ai-tool-call-item-summary">
+                    {'  '}
+                    {toolCall.summary}
+                  </span>
+                )}
+              </div>
             </summary>
             <div className="jp-ai-tool-call-item-detail">
               {permissionDetail}
@@ -724,7 +740,15 @@ function ToolCallRow({
       <details className={cssClass}>
         <summary>
           <span className="jp-ai-tool-call-item-icon">{icon}</span>{' '}
-          {displayTitle}
+          <div className="jp-ai-tool-call-item-title">
+            {displayTitle}
+            {toolCall.summary && (
+              <span className="jp-ai-tool-call-item-summary">
+                {'  '}
+                {toolCall.summary}
+              </span>
+            )}
+          </div>
           <PermissionLabel toolCall={toolCall} />
         </summary>
         {hasDiffs ? (
@@ -748,7 +772,15 @@ function ToolCallRow({
     return (
       <div className={cssClass}>
         <span className="jp-ai-tool-call-item-icon">{icon}</span>{' '}
-        <em>{displayTitle}</em>
+        <div className="jp-ai-tool-call-item-title">
+          {displayTitle}
+          {toolCall.summary && (
+            <span className="jp-ai-tool-call-item-summary">
+              {'  '}
+              {toolCall.summary}
+            </span>
+          )}
+        </div>
         <PermissionButtons
           toolCall={toolCall}
           trans={trans}
@@ -760,7 +792,16 @@ function ToolCallRow({
 
   return (
     <div className={cssClass}>
-      <span className="jp-ai-tool-call-item-icon">{icon}</span> {displayTitle}
+      <span className="jp-ai-tool-call-item-icon">{icon}</span>
+      <div className="jp-ai-tool-call-item-title">
+        {displayTitle}
+        {toolCall.summary && (
+          <span className="jp-ai-tool-call-item-summary">
+            {'  '}
+            {toolCall.summary}
+          </span>
+        )}
+      </div>
       <PermissionLabel toolCall={toolCall} />
     </div>
   );

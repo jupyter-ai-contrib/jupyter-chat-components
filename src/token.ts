@@ -182,6 +182,10 @@ export interface IToolCallsEntry {
    */
   title?: string;
   /**
+   * Human-readable summary from tool input displayed with the title
+   */
+  summary?: string;
+  /**
    * Tool operation category.
    */
   kind?: string;

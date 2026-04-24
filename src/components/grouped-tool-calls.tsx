@@ -110,33 +110,6 @@ export function formatToolCallIO(payload: unknown): string {
   return JSON.stringify(payload, null, 2);
 }
 
-/**
- * Format tool input for display.
- */
-export function formatToolCallInput(input: unknown): string {
-  if (typeof input === 'string') {
-    return input;
-  }
-
-  if (typeof input !== 'object' || input === null || Array.isArray(input)) {
-    return JSON.stringify(input, null, 2);
-  }
-
-  const entries = Object.entries(input as Record<string, unknown>);
-  const isFlat = entries.every(
-    ([, value]) =>
-      typeof value === 'string' ||
-      typeof value === 'number' ||
-      typeof value === 'boolean'
-  );
-
-  if (isFlat) {
-    return entries.map(([key, value]) => `${key}: ${value}`).join('\n');
-  }
-
-  return JSON.stringify(input, null, 2);
-}
-
 function getLocationSummary(toolCall: IToolCallsEntry): string | null {
   const firstLocation = toolCall.locations?.[0];
 
@@ -231,7 +204,7 @@ export function buildPermissionDetail(
       {}
     );
     const params =
-      paramEntries.length > 0 ? formatToolCallInput(filteredParams) : null;
+      paramEntries.length > 0 ? formatToolCallIO(filteredParams) : null;
 
     if (purpose && params) {
       return `${purpose}\n${params}`;
@@ -249,7 +222,7 @@ export function buildPermissionDetail(
   }
 
   if (rawInput !== null && rawInput !== undefined) {
-    return formatToolCallInput(rawInput);
+    return formatToolCallIO(rawInput);
   }
 
   return null;
@@ -688,8 +661,13 @@ function ToolCallRow({
         ? '\u2717'
         : '\u2022';
   const effectiveStatus = (isRejected ? 'failed' : status).replace(/_/g, '-');
-  const cssClass = `jp-ai-tool-call-item jp-ai-tool-call-item-${effectiveStatus}`;
+
   const hasDiffs = !!toolCall.diffs?.length;
+  const hasExpandableContent =
+    hasDiffs ||
+    (!hasDiffs && (isCompleted || isFailed) && hasDetailContent(toolCall));
+
+  const cssClass = `jp-ai-tool-call-item jp-ai-tool-call-item-${effectiveStatus}${!hasExpandableContent && !hasPendingPermission ? ' jp-ai-tool-call-item-no-detail' : ''}`;
 
   if (hasDiffs && hasPendingPermission) {
     return (
@@ -755,10 +733,6 @@ function ToolCallRow({
       );
     }
   }
-
-  const hasExpandableContent =
-    hasDiffs ||
-    (!hasDiffs && (isCompleted || isFailed) && hasDetailContent(toolCall));
 
   if ((isCompleted || isFailed) && hasExpandableContent) {
     return (

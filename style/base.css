@@ -233,15 +233,6 @@
 .jp-ai-tool-call-item {
   padding: 1px 0;
   font-family: var(--jp-content-font-family);
-}
-
-.jp-ai-tool-call-item-in-progress,
-.jp-ai-tool-call-item-pending {
-  color: var(--jp-ui-font-color2);
-}
-
-.jp-ai-tool-call-item-completed,
-.jp-ai-tool-call-item-failed {
   color: var(--jp-ui-font-color2);
 }
 
@@ -256,7 +247,30 @@
 details.jp-ai-tool-call-item summary,
 .jp-ai-tool-call-item details summary {
   cursor: pointer;
+}
+
+details.jp-ai-tool-call-item summary,
+.jp-ai-tool-call-item details summary,
+.jp-ai-tool-call-item.jp-ai-tool-call-item-no-detail {
   list-style: none;
+  display: flex;
+  align-items: center;
+  padding: 4px 8px;
+  background: var(--jp-layout-color1);
+  gap: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.jp-ai-tool-call-item-title {
+  font-size: var(--jp-ui-font-size1);
+  font-weight: 500;
+  flex: 1;
+}
+
+.jp-ai-tool-call-item-summary {
+  font-weight: 400;
+  opacity: 0.8;
+  font-size: var(--jp-ui-font-size0);
 }
 
 details.jp-ai-tool-call-item summary::-webkit-details-marker,
@@ -286,9 +300,40 @@ details[open].jp-ai-tool-call-item summary::after,
   margin: 2px 0 2px 20px;
   font-size: var(--jp-code-font-size);
   font-family: var(--jp-code-font-family);
-  color: var(--jp-ui-font-color2);
   white-space: pre-wrap;
   word-break: break-all;
+  padding-left: 5px;
+}
+
+.jp-ai-tool-call-detail-section {
+  margin-bottom: 8px;
+}
+
+.jp-ai-tool-call-detail-section:last-child {
+  margin-bottom: 0;
+}
+
+.jp-ai-tool-call-detail-label {
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size0);
+  font-weight: 600;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.jp-ai-tool-call-detail-code {
+  background: var(--jp-layout-color2) !important;
+  border: 1px solid var(--jp-border-color1) !important;
+  border-radius: 4px !important;
+  padding: 8px !important;
+  margin: 0 !important;
+  font-size: var(--jp-ui-font-size1) !important;
+  overflow: auto;
+}
+
+.jp-ai-tool-call-detail-code code {
+  font-size: var(--jp-ui-font-size1) !important;
 }
 
 .jp-ai-tool-call-permission-buttons {
@@ -297,6 +342,7 @@ details[open].jp-ai-tool-call-item summary::after,
   margin: 4px 0;
   align-items: center;
   flex-wrap: wrap;
+  padding-left: 5px;
 }
 
 .jp-ai-tool-call-permission-tree {

@@ -61,6 +61,7 @@
         "@jupyterlab/rendermime": "^4.5.0",
         "@jupyterlab/rendermime-interfaces": "^3.8.0",
         "@jupyterlab/translation": "^4.5.0",
+        "@jupyterlab/ui-components": "^4.5.0",
         "@lumino/coreutils": "^2.2.2",
         "@lumino/widgets": "^2.1.0",
         "diff": "^8.0.0"

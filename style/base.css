@@ -661,9 +661,7 @@ details[open].jp-ai-tool-call-item summary::after,
 }
 
 .jp-ai-error-icon {
-  display: flex;
   color: var(--jp-error-color1);
-  margin-top: 2px;
 }
 
 .jp-ai-error-body {

@@ -18,6 +18,7 @@ import {
 import { ComponentRegistry } from './registry';
 
 import {
+  EditQueuedMessage,
   IComponentRegistry,
   IComponentsRendererFactory,
   OpenToolCallPath,
@@ -61,6 +62,11 @@ interface IComponentsRendererOptions extends IRenderMime.IRendererOptions {
   reorderQueuedMessages?: ReorderQueuedMessages;
 
   /**
+   * The callback to edit the body of a queued message.
+   */
+  editQueuedMessage?: EditQueuedMessage;
+
+  /**
    * The callback to submit a permission decision for grouped tool calls.
    */
   toolCallPermissionDecision?: ToolCallPermissionDecision;
@@ -93,6 +99,7 @@ export class ComponentsRenderer
     this._toolCallApproval = options.toolCallApproval;
     this._removeQueuedMessage = options.removeQueuedMessage;
     this._reorderQueuedMessages = options.reorderQueuedMessages;
+    this._editQueuedMessage = options.editQueuedMessage;
     this._toolCallPermissionDecision = options.toolCallPermissionDecision;
     this._openToolCallPath = options.openToolCallPath;
     this._registry = options.registry;
@@ -129,6 +136,7 @@ export class ComponentsRenderer
     if (this._data === 'message-queue') {
       componentsProps.removeQueuedMessage = this._removeQueuedMessage;
       componentsProps.reorderQueuedMessages = this._reorderQueuedMessages;
+      componentsProps.editQueuedMessage = this._editQueuedMessage;
     }
 
     if (this._data === 'grouped-tool-calls') {
@@ -145,6 +153,7 @@ export class ComponentsRenderer
   private _toolCallApproval?: ToolCallApproval;
   private _removeQueuedMessage?: RemoveQueuedMessage;
   private _reorderQueuedMessages?: ReorderQueuedMessages;
+  private _editQueuedMessage?: EditQueuedMessage;
   private _toolCallPermissionDecision?: ToolCallPermissionDecision;
   private _openToolCallPath?: OpenToolCallPath;
   private _registry: IComponentRegistry;
@@ -163,6 +172,7 @@ export class RendererFactory implements IComponentsRendererFactory {
   toolCallApproval: ToolCallApproval = null;
   removeQueuedMessage: RemoveQueuedMessage = null;
   reorderQueuedMessages: ReorderQueuedMessages = null;
+  editQueuedMessage: EditQueuedMessage = null;
   toolCallPermissionDecision: ToolCallPermissionDecision = null;
   openToolCallPath: OpenToolCallPath = null;
 
@@ -180,6 +190,7 @@ export class RendererFactory implements IComponentsRendererFactory {
       toolCallApproval: this.toolCallApproval,
       removeQueuedMessage: this.removeQueuedMessage,
       reorderQueuedMessages: this.reorderQueuedMessages,
+      editQueuedMessage: this.editQueuedMessage,
       toolCallPermissionDecision: this.toolCallPermissionDecision,
       openToolCallPath: this.openToolCallPath,
       registry: this.registry

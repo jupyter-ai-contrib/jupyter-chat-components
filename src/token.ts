@@ -47,6 +47,13 @@ export type ReorderQueuedMessages =
   | null;
 
 /**
+ * The callback to edit the body of a queued message.
+ */
+export type EditQueuedMessage =
+  | ((targetId: string, messageId: string, newBody: string) => void)
+  | null;
+
+/**
  * The callback to open a file or resource path referenced by a tool call.
  */
 export type OpenToolCallPath = ((path: string) => void) | null;
@@ -75,6 +82,11 @@ export interface IComponentsRendererFactory
    * The callback to reorder queued messages.
    */
   reorderQueuedMessages: ReorderQueuedMessages;
+
+  /**
+   * The callback to edit the body of a queued message.
+   */
+  editQueuedMessage: EditQueuedMessage;
 
   /**
    * The callback to submit a permission decision for grouped tool calls.

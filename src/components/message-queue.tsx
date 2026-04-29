@@ -1,9 +1,16 @@
 import * as React from 'react';
 
 import { PathExt } from '@jupyterlab/coreutils';
-import { fileIcon, notebookIcon } from '@jupyterlab/ui-components';
+import {
+  checkIcon,
+  closeIcon,
+  editIcon,
+  fileIcon,
+  notebookIcon
+} from '@jupyterlab/ui-components';
 
 import {
+  EditQueuedMessage,
   IComponentProps,
   IMessageQueueMetadata,
   IQueuedMessageAttachment,
@@ -15,6 +22,7 @@ export interface IMessageQueueProps
   extends IComponentProps, IMessageQueueMetadata {
   removeQueuedMessage?: RemoveQueuedMessage;
   reorderQueuedMessages?: ReorderQueuedMessages;
+  editQueuedMessage?: EditQueuedMessage;
 }
 
 function AttachmentIcon({
@@ -35,11 +43,25 @@ export const MessageQueue: React.FC<IMessageQueueProps> = ({
   targetId,
   trans,
   removeQueuedMessage,
-  reorderQueuedMessages
+  reorderQueuedMessages,
+  editQueuedMessage
 }) => {
   const [expanded, setExpanded] = React.useState(true);
   const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
   const [dropLineIndex, setDropLineIndex] = React.useState<number | null>(null);
+  const [editingId, setEditingId] = React.useState<string | null>(null);
+  const [editBody, setEditBody] = React.useState('');
+  const textareaRef = React.useRef<HTMLTextAreaElement>(null);
+
+  React.useEffect(() => {
+    if (editingId && textareaRef.current) {
+      const ta = textareaRef.current;
+      ta.focus();
+      ta.selectionStart = ta.selectionEnd = ta.value.length;
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+    }
+  }, [editingId]);
 
   if (!messages || messages.length === 0) {
     return null;
@@ -93,6 +115,38 @@ export const MessageQueue: React.FC<IMessageQueueProps> = ({
     setDropLineIndex(null);
   };
 
+  const handleEditStart = (id: string, body: string) => {
+    setEditingId(id);
+    setEditBody(body);
+  };
+
+  const handleEditSave = () => {
+    if (!editQueuedMessage || !targetId || editingId === null) {
+      return;
+    }
+    editQueuedMessage(targetId, editingId, editBody.trim());
+    setEditingId(null);
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+  };
+
+  const handleEditKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleEditSave();
+    } else if (e.key === 'Escape') {
+      handleEditCancel();
+    }
+  };
+
+  const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEditBody(e.target.value);
+    e.target.style.height = 'auto';
+    e.target.style.height = e.target.scrollHeight + 'px';
+  };
+
   return (
     <div className="jp-chat-message-queue">
       <div className="jp-chat-message-queue-header">
@@ -137,12 +191,14 @@ export const MessageQueue: React.FC<IMessageQueueProps> = ({
                   ]
                     .filter(Boolean)
                     .join(' ')}
-                  draggable={canDrag}
+                  draggable={canDrag && editingId !== msg.id}
                   onDragStart={
-                    canDrag ? () => handleDragStart(index) : undefined
+                    canDrag && editingId !== msg.id
+                      ? () => handleDragStart(index)
+                      : undefined
                   }
                   onDragEnd={canDrag ? handleDragEnd : undefined}
-                  title={msg.body}
+                  title={editingId === msg.id ? undefined : msg.body}
                 >
                   {canDrag && (
                     <span
@@ -151,10 +207,24 @@ export const MessageQueue: React.FC<IMessageQueueProps> = ({
                     />
                   )}
                   <div className="jp-chat-message-queue-content">
-                    {msg.body && (
-                      <span className="jp-chat-message-queue-text">
-                        {msg.body}
-                      </span>
+                    {editingId === msg.id ? (
+                      <textarea
+                        ref={textareaRef}
+                        className="jp-chat-message-queue-edit-textarea"
+                        value={editBody}
+                        onChange={handleTextareaChange}
+                        onKeyDown={handleEditKeyDown}
+                        rows={1}
+                        title={trans.__(
+                          'Enter to save, Escape to cancel, Shift+Enter for newline'
+                        )}
+                      />
+                    ) : (
+                      msg.body && (
+                        <span className="jp-chat-message-queue-text">
+                          {msg.body}
+                        </span>
+                      )
                     )}
                     {msg.attachments && msg.attachments.length > 0 && (
                       <div className="jp-chat-message-queue-attachments">
@@ -171,14 +241,45 @@ export const MessageQueue: React.FC<IMessageQueueProps> = ({
                       </div>
                     )}
                   </div>
-                  {removeQueuedMessage && targetId && (
+                  {editQueuedMessage && targetId && (
+                    <button
+                      className="jp-chat-message-queue-edit"
+                      onClick={
+                        editingId === msg.id
+                          ? handleEditSave
+                          : () => handleEditStart(msg.id, msg.body)
+                      }
+                      title={
+                        editingId === msg.id
+                          ? trans.__('Save')
+                          : trans.__('Edit message')
+                      }
+                      type="button"
+                    >
+                      {editingId === msg.id ? (
+                        <checkIcon.react
+                          tag="span"
+                          className="jp-chat-message-queue-btn-icon"
+                        />
+                      ) : (
+                        <editIcon.react
+                          tag="span"
+                          className="jp-chat-message-queue-btn-icon"
+                        />
+                      )}
+                    </button>
+                  )}
+                  {removeQueuedMessage && targetId && editingId !== msg.id && (
                     <button
                       className="jp-chat-message-queue-remove"
                       onClick={() => removeQueuedMessage(targetId, msg.id)}
                       title={trans.__('Remove from queue')}
                       type="button"
                     >
-                      {'✕'}
+                      <closeIcon.react
+                        tag="span"
+                        className="jp-chat-message-queue-btn-icon"
+                      />
                     </button>
                   )}
                 </div>

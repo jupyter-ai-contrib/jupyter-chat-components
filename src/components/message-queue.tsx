@@ -48,7 +48,6 @@ export const MessageQueue: React.FC<IMessageQueueProps> = ({
 }) => {
   const [expanded, setExpanded] = React.useState(true);
   const [draggedIndex, setDraggedIndex] = React.useState<number | null>(null);
-  const [dropLineIndex, setDropLineIndex] = React.useState<number | null>(null);
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [editBody, setEditBody] = React.useState('');
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -69,51 +68,27 @@ export const MessageQueue: React.FC<IMessageQueueProps> = ({
 
   const canDrag = !!reorderQueuedMessages && !!targetId;
 
-  const handleDragStart = (index: number) => {
-    setDraggedIndex(index);
-  };
-
-  // Full-width row dragover: use Y midpoint to decide before or after this item.
-  const handleRowDragOver = (
-    e: React.DragEvent<HTMLDivElement>,
-    index: number
-  ) => {
-    e.preventDefault();
-    const rect = e.currentTarget.getBoundingClientRect();
-    setDropLineIndex(
-      e.clientY < rect.top + rect.height / 2 ? index : index + 1
-    );
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    if (
-      draggedIndex === null ||
-      dropLineIndex === null ||
-      !reorderQueuedMessages ||
-      !targetId
-    ) {
+  const handleDrop =
+    (targetIndex: number) => (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      if (
+        draggedIndex === null ||
+        draggedIndex === targetIndex ||
+        !reorderQueuedMessages ||
+        !targetId
+      ) {
+        setDraggedIndex(null);
+        return;
+      }
+      const reordered = [...messages];
+      const [moved] = reordered.splice(draggedIndex, 1);
+      reordered.splice(targetIndex, 0, moved);
+      reorderQueuedMessages(
+        targetId,
+        reordered.map(m => m.id)
+      );
       setDraggedIndex(null);
-      setDropLineIndex(null);
-      return;
-    }
-    const reordered = [...messages];
-    const [moved] = reordered.splice(draggedIndex, 1);
-    const insertAt =
-      draggedIndex < dropLineIndex ? dropLineIndex - 1 : dropLineIndex;
-    reordered.splice(insertAt, 0, moved);
-    reorderQueuedMessages(
-      targetId,
-      reordered.map(m => m.id)
-    );
-    setDraggedIndex(null);
-    setDropLineIndex(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    setDropLineIndex(null);
-  };
+    };
 
   const handleEditStart = (id: string, body: string) => {
     setEditingId(id);
@@ -166,141 +141,117 @@ export const MessageQueue: React.FC<IMessageQueueProps> = ({
         </button>
       </div>
       {expanded && (
-        <div
-          className="jp-chat-message-queue-list"
-          onDrop={canDrag ? handleDrop : undefined}
-        >
+        <div className="jp-chat-message-queue-list">
           {messages.map((msg, index) => (
-            <React.Fragment key={msg.id}>
-              {dropLineIndex === index && (
-                <div className="jp-chat-message-queue-drop-line" />
-              )}
-              {/* Full-width row: dragover fires anywhere across the row width */}
+            <div
+              key={msg.id}
+              className="jp-chat-message-queue-row"
+              onDragOver={canDrag ? e => e.preventDefault() : undefined}
+              onDrop={canDrag ? handleDrop(index) : undefined}
+            >
               <div
-                className="jp-chat-message-queue-row"
-                onDragOver={
-                  canDrag ? e => handleRowDragOver(e, index) : undefined
+                className={[
+                  'jp-chat-message-queue-bubble',
+                  draggedIndex === index
+                    ? 'jp-chat-message-queue-bubble-dragging'
+                    : ''
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                draggable={canDrag && editingId !== msg.id}
+                onDragStart={
+                  canDrag && editingId !== msg.id
+                    ? () => setDraggedIndex(index)
+                    : undefined
                 }
+                onDragEnd={canDrag ? () => setDraggedIndex(null) : undefined}
+                title={editingId === msg.id ? undefined : msg.body}
               >
-                <div
-                  className={[
-                    'jp-chat-message-queue-bubble',
-                    draggedIndex === index
-                      ? 'jp-chat-message-queue-bubble-dragging'
-                      : ''
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  draggable={canDrag && editingId !== msg.id}
-                  onDragStart={
-                    canDrag && editingId !== msg.id
-                      ? () => handleDragStart(index)
-                      : undefined
-                  }
-                  onDragEnd={canDrag ? handleDragEnd : undefined}
-                  title={editingId === msg.id ? undefined : msg.body}
-                >
-                  {canDrag && (
-                    <span
-                      className="jp-chat-message-queue-drag-handle"
-                      aria-hidden="true"
-                    />
-                  )}
-                  <div className="jp-chat-message-queue-content">
-                    {editingId === msg.id ? (
-                      <textarea
-                        ref={textareaRef}
-                        className="jp-chat-message-queue-edit-textarea"
-                        value={editBody}
-                        onChange={handleTextareaChange}
-                        onKeyDown={handleEditKeyDown}
-                        rows={1}
-                        title={trans.__(
-                          'Enter to save, Escape to cancel, Shift+Enter for newline'
-                        )}
-                      />
-                    ) : (
-                      msg.body && (
-                        <span className="jp-chat-message-queue-text">
-                          {msg.body}
-                        </span>
-                      )
-                    )}
-                    {msg.attachments && msg.attachments.length > 0 && (
-                      <div className="jp-chat-message-queue-attachments">
-                        {msg.attachments.map((attachment, i) => (
-                          <span
-                            key={i}
-                            className="jp-chat-message-queue-attachment-item"
-                            title={attachment.value}
-                          >
-                            <AttachmentIcon type={attachment.type} />
-                            {attachmentName(attachment)}
-                          </span>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  {editQueuedMessage && targetId && (
-                    <button
-                      className="jp-chat-message-queue-edit"
-                      onClick={
-                        editingId === msg.id
-                          ? handleEditSave
-                          : () => handleEditStart(msg.id, msg.body)
-                      }
-                      title={
-                        editingId === msg.id
-                          ? trans.__('Save')
-                          : trans.__('Edit message')
-                      }
-                      type="button"
-                    >
-                      {editingId === msg.id ? (
-                        <checkIcon.react
-                          tag="span"
-                          className="jp-chat-message-queue-btn-icon"
-                        />
-                      ) : (
-                        <editIcon.react
-                          tag="span"
-                          className="jp-chat-message-queue-btn-icon"
-                        />
+                {canDrag && (
+                  <span
+                    className="jp-chat-message-queue-drag-handle"
+                    aria-hidden="true"
+                  />
+                )}
+                <div className="jp-chat-message-queue-content">
+                  {editingId === msg.id ? (
+                    <textarea
+                      ref={textareaRef}
+                      className="jp-chat-message-queue-edit-textarea"
+                      value={editBody}
+                      onChange={handleTextareaChange}
+                      onKeyDown={handleEditKeyDown}
+                      rows={1}
+                      title={trans.__(
+                        'Enter to save, Escape to cancel, Shift+Enter for newline'
                       )}
-                    </button>
+                    />
+                  ) : (
+                    msg.body && (
+                      <span className="jp-chat-message-queue-text">
+                        {msg.body}
+                      </span>
+                    )
                   )}
-                  {removeQueuedMessage && targetId && editingId !== msg.id && (
-                    <button
-                      className="jp-chat-message-queue-remove"
-                      onClick={() => removeQueuedMessage(targetId, msg.id)}
-                      title={trans.__('Remove from queue')}
-                      type="button"
-                    >
-                      <closeIcon.react
+                  {msg.attachments && msg.attachments.length > 0 && (
+                    <div className="jp-chat-message-queue-attachments">
+                      {msg.attachments.map((attachment, i) => (
+                        <span
+                          key={i}
+                          className="jp-chat-message-queue-attachment-item"
+                          title={attachment.value}
+                        >
+                          <AttachmentIcon type={attachment.type} />
+                          {attachmentName(attachment)}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {editQueuedMessage && targetId && (
+                  <button
+                    className="jp-chat-message-queue-edit"
+                    onClick={
+                      editingId === msg.id
+                        ? handleEditSave
+                        : () => handleEditStart(msg.id, msg.body)
+                    }
+                    title={
+                      editingId === msg.id
+                        ? trans.__('Save')
+                        : trans.__('Edit message')
+                    }
+                    type="button"
+                  >
+                    {editingId === msg.id ? (
+                      <checkIcon.react
                         tag="span"
                         className="jp-chat-message-queue-btn-icon"
                       />
-                    </button>
-                  )}
-                </div>
+                    ) : (
+                      <editIcon.react
+                        tag="span"
+                        className="jp-chat-message-queue-btn-icon"
+                      />
+                    )}
+                  </button>
+                )}
+                {removeQueuedMessage && targetId && editingId !== msg.id && (
+                  <button
+                    className="jp-chat-message-queue-remove"
+                    onClick={() => removeQueuedMessage(targetId, msg.id)}
+                    title={trans.__('Remove from queue')}
+                    type="button"
+                  >
+                    <closeIcon.react
+                      tag="span"
+                      className="jp-chat-message-queue-btn-icon"
+                    />
+                  </button>
+                )}
               </div>
-            </React.Fragment>
+            </div>
           ))}
-          {dropLineIndex === messages.length && (
-            <div className="jp-chat-message-queue-drop-line" />
-          )}
-          {/* End zone: catches drops below the last item */}
-          <div
-            className="jp-chat-message-queue-end-zone"
-            onDragOver={
-              canDrag
-                ? e => {
-                    e.preventDefault();
-                    setDropLineIndex(messages.length);
-                  }
-                : undefined
-            }
-          />
         </div>
       )}
     </div>

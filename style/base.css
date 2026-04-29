@@ -654,18 +654,6 @@ details[open].jp-ai-tool-call-item summary::after,
   justify-content: flex-end;
 }
 
-.jp-chat-message-queue-end-zone {
-  width: 100%;
-  min-height: 16px;
-}
-
-.jp-chat-message-queue-drop-line {
-  width: 100%;
-  height: 2px;
-  background-color: var(--jp-brand-color1);
-  border-radius: 1px;
-  margin: -4px 0;
-}
 
 .jp-chat-message-queue-bubble-dragging {
   opacity: 0.4;

@@ -654,7 +654,6 @@ details[open].jp-ai-tool-call-item summary::after,
   justify-content: flex-end;
 }
 
-
 .jp-chat-message-queue-bubble-dragging {
   opacity: 0.4;
 }
@@ -667,7 +666,9 @@ details[open].jp-ai-tool-call-item summary::after,
   background-image:
     radial-gradient(circle, var(--jp-ui-font-color2) 1px, transparent 1px),
     radial-gradient(circle, var(--jp-ui-font-color2) 1px, transparent 1px);
-  background-position: 0 0, 4px 0;
+  background-position:
+    0 0,
+    4px 0;
   background-size: 4px 5px;
   background-repeat: repeat-y, repeat-y;
   opacity: 0.5;

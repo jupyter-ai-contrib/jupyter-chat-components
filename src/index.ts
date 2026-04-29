@@ -32,5 +32,6 @@ export * from './token';
 export * from './factory';
 export * from './registry';
 export * from './components';
+export * from './icons';
 
 export default factory;

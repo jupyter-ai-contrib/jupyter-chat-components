@@ -597,6 +597,44 @@ details[open].jp-ai-tool-call-item summary::after,
   width: 100%;
 }
 
+.jp-chat-message-queue-list {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.jp-chat-message-queue-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  pointer-events: auto;
+  align-self: flex-end;
+}
+
+.jp-chat-message-queue-count {
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color2);
+}
+
+.jp-chat-message-queue-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: none;
+  background: transparent;
+  color: var(--jp-ui-font-color2);
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.jp-chat-message-queue-toggle:hover {
+  color: var(--jp-ui-font-color1);
+}
+
 .jp-chat-message-queue-bubble {
   position: relative;
   display: inline-flex;
@@ -605,8 +643,47 @@ details[open].jp-ai-tool-call-item summary::after,
   background-color: var(--jp-layout-color2);
   border: 1px solid var(--jp-border-color1);
   border-radius: 16px;
-  padding: 4px 28px 4px 12px;
+  padding: 4px 48px 4px 12px;
   pointer-events: auto;
+  max-width: 100%;
+}
+
+.jp-chat-message-queue-row {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.jp-chat-message-queue-bubble-dragging {
+  opacity: 0.4;
+}
+
+.jp-chat-message-queue-drag-handle {
+  flex-shrink: 0;
+  width: 8px;
+  height: 16px;
+  cursor: grab;
+  background-image:
+    radial-gradient(circle, var(--jp-ui-font-color2) 1px, transparent 1px),
+    radial-gradient(circle, var(--jp-ui-font-color2) 1px, transparent 1px);
+  background-position:
+    0 0,
+    4px 0;
+  background-size: 4px 5px;
+  background-repeat: repeat-y, repeat-y;
+  opacity: 0.5;
+}
+
+.jp-chat-message-queue-bubble:hover .jp-chat-message-queue-drag-handle {
+  opacity: 0.8;
+}
+
+.jp-chat-message-queue-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .jp-chat-message-queue-text {
@@ -634,6 +711,70 @@ details[open].jp-ai-tool-call-item summary::after,
   font-size: 10px;
   cursor: pointer;
   opacity: 0;
+  flex-shrink: 0;
+}
+
+.jp-chat-message-queue-edit {
+  position: absolute;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--jp-ui-font-color2);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.jp-chat-message-queue-edit:hover {
+  background: var(--jp-layout-color3);
+  color: var(--jp-ui-font-color1);
+}
+
+.jp-chat-message-queue-bubble:hover .jp-chat-message-queue-edit {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.jp-chat-message-queue-bubble:has(.jp-chat-message-queue-edit-textarea)
+  .jp-chat-message-queue-edit {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.jp-chat-message-queue-edit-textarea {
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  background: var(--jp-layout-color1);
+  color: var(--jp-ui-font-color0);
+  border: var(--jp-border-width) solid var(--jp-brand-color1);
+  border-radius: 2px;
+  font-family: var(--jp-ui-font-family);
+  font-size: var(--jp-ui-font-size1);
+  padding: 2px 4px;
+  outline: none;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.jp-chat-message-queue-btn-icon {
+  display: inline-flex;
+  width: 12px;
+  height: 12px;
+}
+
+.jp-chat-message-queue-btn-icon svg {
+  width: 12px;
+  height: 12px;
 }
 
 .jp-chat-message-queue-remove:hover {
@@ -643,4 +784,38 @@ details[open].jp-ai-tool-call-item summary::after,
 
 .jp-chat-message-queue-bubble:hover .jp-chat-message-queue-remove {
   opacity: 1;
+}
+
+.jp-chat-message-queue-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  margin-top: 2px;
+}
+
+.jp-chat-message-queue-attachment-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color1);
+  border: var(--jp-border-width) solid var(--jp-border-color1);
+  border-radius: 2px;
+  padding: 0 4px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jp-chat-message-queue-attachment-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+}
+
+.jp-chat-message-queue-attachment-icon svg {
+  width: 14px;
+  height: 14px;
 }

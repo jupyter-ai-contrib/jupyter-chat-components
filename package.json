@@ -7,9 +7,9 @@
         "jupyterlab",
         "jupyterlab-extension"
     ],
-    "homepage": "https://github.com/brichet/jupyter-chat-components",
+    "homepage": "https://github.com/jupyter-ai-contrib/jupyter-chat-components",
     "bugs": {
-        "url": "https://github.com/brichet/jupyter-chat-components/issues"
+        "url": "https://github.com/jupyter-ai-contrib/jupyter-chat-components/issues"
     },
     "license": "BSD-3-Clause",
     "author": {
@@ -26,7 +26,7 @@
     "style": "style/index.css",
     "repository": {
         "type": "git",
-        "url": "https://github.com/brichet/jupyter-chat-components.git"
+        "url": "https://github.com/jupyter-ai-contrib/jupyter-chat-components.git"
     },
     "scripts": {
         "build": "jlpm build:lib && jlpm build:labextension:dev",

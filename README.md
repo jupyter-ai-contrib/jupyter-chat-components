@@ -1,6 +1,6 @@
 # jupyter_chat_components
 
-[![Github Actions Status](https://github.com/brichet/jupyter-chat-components/workflows/Build/badge.svg)](https://github.com/brichet/jupyter-chat-components/actions/workflows/build.yml)
+[![Github Actions Status](https://github.com/jupyter-ai-contrib/jupyter-chat-components/workflows/Build/badge.svg)](https://github.com/jupyter-ai-contrib/jupyter-chat-components/actions/workflows/build.yml)
 
 A library of React components designed for use in Jupyter chat interfaces, with a focus on AI-powered interactions. These components are intended to be integrated into JupyterLab extensions that provide chat functionality.
 
@@ -26,7 +26,7 @@ The registry is available directly on the `IComponentsRendererFactory` token as 
 
 Other JupyterLab extensions can consume the `IComponentsRendererFactory` token and use `registry.add()` to register their own components, which will then be available for rendering via the MIME bundle.
 
-For live end-to-end metadata examples, see the deployed demo notebook at [brichet.github.io/jupyter-chat-components/lab/index.html?path=components_demo.ipynb](https://brichet.github.io/jupyter-chat-components/lab/index.html?path=components_demo.ipynb). The source notebook lives at [demo/contents/components_demo.ipynb](./demo/contents/components_demo.ipynb).
+For live end-to-end metadata examples, see the deployed demo notebook at [jupyter-ai-contrib.github.io/jupyter-chat-components/lab/index.html?path=components_demo.ipynb](https://jupyter-ai-contrib.github.io/jupyter-chat-components/lab/index.html?path=components_demo.ipynb). The source notebook lives at [demo/contents/components_demo.ipynb](./demo/contents/components_demo.ipynb).
 
 ## Requirements
 

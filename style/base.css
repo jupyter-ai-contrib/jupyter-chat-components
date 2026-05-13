@@ -819,6 +819,7 @@ details[open].jp-ai-tool-call-item summary::after,
   width: 14px;
   height: 14px;
 }
+
 /* Error Component Styling */
 .jp-ai-error-message {
   display: flex;

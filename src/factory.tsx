@@ -12,7 +12,8 @@ import {
   GroupedToolCalls,
   InlineDiff,
   MessageQueue,
-  ToolCall
+  ToolCall,
+  ErrorMessage
 } from './components';
 
 import { ComponentRegistry } from './registry';
@@ -182,6 +183,7 @@ export class RendererFactory implements IComponentsRendererFactory {
     this.registry.add('grouped-tool-calls', GroupedToolCalls);
     this.registry.add('inline-diff', InlineDiff);
     this.registry.add('message-queue', MessageQueue);
+    this.registry.add('error', ErrorMessage);
   }
 
   createRenderer = (options: IRenderMime.IRendererOptions) => {

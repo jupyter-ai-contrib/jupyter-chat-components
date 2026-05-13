@@ -40,6 +40,20 @@ export type RemoveQueuedMessage =
   | null;
 
 /**
+ * The callback to reorder queued messages. Receives the new ordered list of message IDs.
+ */
+export type ReorderQueuedMessages =
+  | ((targetId: string, messageIds: string[]) => void)
+  | null;
+
+/**
+ * The callback to edit the body of a queued message.
+ */
+export type EditQueuedMessage =
+  | ((targetId: string, messageId: string, newBody: string) => void)
+  | null;
+
+/**
  * The callback to open a file or resource path referenced by a tool call.
  */
 export type OpenToolCallPath = ((path: string) => void) | null;
@@ -63,6 +77,16 @@ export interface IComponentsRendererFactory
    * The callback to remove a queued message.
    */
   removeQueuedMessage: RemoveQueuedMessage;
+
+  /**
+   * The callback to reorder queued messages.
+   */
+  reorderQueuedMessages: ReorderQueuedMessages;
+
+  /**
+   * The callback to edit the body of a queued message.
+   */
+  editQueuedMessage: EditQueuedMessage;
 
   /**
    * The callback to submit a permission decision for grouped tool calls.
@@ -301,11 +325,20 @@ export interface IInlineDiffMetadata {
 }
 
 /**
+ * A single attachment in a queued message.
+ */
+export interface IQueuedMessageAttachment {
+  type: 'file' | 'notebook';
+  value: string;
+}
+
+/**
  * A single queued message entry.
  */
 export interface IQueuedMessage {
   id: string;
   body: string;
+  attachments?: IQueuedMessageAttachment[];
 }
 
 /**

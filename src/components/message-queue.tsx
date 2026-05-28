@@ -10,20 +10,14 @@ import {
 } from '@jupyterlab/ui-components';
 
 import {
-  EditQueuedMessage,
   IComponentProps,
   IMessageQueueMetadata,
   IQueuedMessageAttachment,
-  RemoveQueuedMessage,
-  ReorderQueuedMessages
+  IQueueMessageCallbacks
 } from '../token';
 
 export interface IMessageQueueProps
-  extends IComponentProps, IMessageQueueMetadata {
-  removeQueuedMessage?: RemoveQueuedMessage;
-  reorderQueuedMessages?: ReorderQueuedMessages;
-  editQueuedMessage?: EditQueuedMessage;
-}
+  extends IComponentProps, IMessageQueueMetadata, IQueueMessageCallbacks {}
 
 function AttachmentIcon({
   type

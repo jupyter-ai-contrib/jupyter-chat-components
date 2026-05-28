@@ -19,14 +19,11 @@ import {
 import { ComponentRegistry } from './registry';
 
 import {
-  EditQueuedMessage,
   IComponentRegistry,
   IComponentsRendererFactory,
-  OpenToolCallPath,
-  RemoveQueuedMessage,
-  ReorderQueuedMessages,
-  ToolCallApproval,
-  ToolCallPermissionDecision
+  IGroupedToolCallCallbacks,
+  IQueueMessageCallbacks,
+  IToolCallCallbacks
 } from './token';
 
 /**
@@ -48,34 +45,19 @@ type ReactRenderElement =
  */
 interface IComponentsRendererOptions extends IRenderMime.IRendererOptions {
   /**
-   * The callback to approve or reject a tool.
+   * Callbacks for the ToolCall component.
    */
-  toolCallApproval?: ToolCallApproval;
+  toolCallCallbacks?: IToolCallCallbacks;
 
   /**
-   * The callback to remove a queued message.
+   * Callbacks for the GroupedToolCalls component.
    */
-  removeQueuedMessage?: RemoveQueuedMessage;
+  groupedToolCallCallbacks?: IGroupedToolCallCallbacks;
 
   /**
-   * The callback to reorder queued messages.
+   * Callbacks for the MessageQueue component.
    */
-  reorderQueuedMessages?: ReorderQueuedMessages;
-
-  /**
-   * The callback to edit the body of a queued message.
-   */
-  editQueuedMessage?: EditQueuedMessage;
-
-  /**
-   * The callback to submit a permission decision for grouped tool calls.
-   */
-  toolCallPermissionDecision?: ToolCallPermissionDecision;
-
-  /**
-   * The callback to open a path referenced by grouped tool calls.
-   */
-  openToolCallPath?: OpenToolCallPath;
+  queueMessageCallbacks?: IQueueMessageCallbacks;
 
   /**
    * The component registry.
@@ -97,12 +79,9 @@ export class ComponentsRenderer
     super();
     this._trans = (options.translator ?? nullTranslator).load('jupyterlab');
     this._mimeType = options.mimeType;
-    this._toolCallApproval = options.toolCallApproval;
-    this._removeQueuedMessage = options.removeQueuedMessage;
-    this._reorderQueuedMessages = options.reorderQueuedMessages;
-    this._editQueuedMessage = options.editQueuedMessage;
-    this._toolCallPermissionDecision = options.toolCallPermissionDecision;
-    this._openToolCallPath = options.openToolCallPath;
+    this._toolCallCallbacks = options.toolCallCallbacks;
+    this._groupedToolCallCallbacks = options.groupedToolCallCallbacks;
+    this._queueMessageCallbacks = options.queueMessageCallbacks;
     this._registry = options.registry;
     this.addClass(CLASS_NAME);
   }
@@ -128,22 +107,17 @@ export class ComponentsRenderer
       return null;
     }
 
-    const componentsProps = { ...(this._metadata as any) };
+    let componentsProps = { ...(this._metadata as any) };
 
     if (this._data === 'tool-call') {
-      componentsProps.toolCallApproval = this._toolCallApproval;
-    }
-
-    if (this._data === 'message-queue') {
-      componentsProps.removeQueuedMessage = this._removeQueuedMessage;
-      componentsProps.reorderQueuedMessages = this._reorderQueuedMessages;
-      componentsProps.editQueuedMessage = this._editQueuedMessage;
-    }
-
-    if (this._data === 'grouped-tool-calls') {
-      componentsProps.toolCallPermissionDecision =
-        this._toolCallPermissionDecision;
-      componentsProps.openToolCallPath = this._openToolCallPath;
+      componentsProps = { ...componentsProps, ...this._toolCallCallbacks };
+    } else if (this._data === 'message-queue') {
+      componentsProps = { ...componentsProps, ...this._queueMessageCallbacks };
+    } else if (this._data === 'grouped-tool-calls') {
+      componentsProps = {
+        ...componentsProps,
+        ...this._groupedToolCallCallbacks
+      };
     }
 
     return <Component {...componentsProps} trans={this._trans} />;
@@ -151,12 +125,9 @@ export class ComponentsRenderer
 
   private _trans: TranslationBundle;
   private _mimeType: string;
-  private _toolCallApproval?: ToolCallApproval;
-  private _removeQueuedMessage?: RemoveQueuedMessage;
-  private _reorderQueuedMessages?: ReorderQueuedMessages;
-  private _editQueuedMessage?: EditQueuedMessage;
-  private _toolCallPermissionDecision?: ToolCallPermissionDecision;
-  private _openToolCallPath?: OpenToolCallPath;
+  private _toolCallCallbacks?: IToolCallCallbacks;
+  private _groupedToolCallCallbacks?: IGroupedToolCallCallbacks;
+  private _queueMessageCallbacks?: IQueueMessageCallbacks;
   private _registry: IComponentRegistry;
   private _data: string | null = null;
   private _metadata: ReadonlyPartialJSONValue | null = null;
@@ -170,12 +141,10 @@ export class RendererFactory implements IComponentsRendererFactory {
   readonly mimeTypes = [MIME_TYPE];
   readonly defaultRank = 100;
   readonly registry: ComponentRegistry;
-  toolCallApproval: ToolCallApproval = null;
-  removeQueuedMessage: RemoveQueuedMessage = null;
-  reorderQueuedMessages: ReorderQueuedMessages = null;
-  editQueuedMessage: EditQueuedMessage = null;
-  toolCallPermissionDecision: ToolCallPermissionDecision = null;
-  openToolCallPath: OpenToolCallPath = null;
+
+  toolCallCallbacks?: IToolCallCallbacks;
+  groupedToolCallCallbacks?: IGroupedToolCallCallbacks;
+  queueMessageCallbacks?: IQueueMessageCallbacks;
 
   constructor() {
     this.registry = new ComponentRegistry();
@@ -189,12 +158,9 @@ export class RendererFactory implements IComponentsRendererFactory {
   createRenderer = (options: IRenderMime.IRendererOptions) => {
     return new ComponentsRenderer({
       ...options,
-      toolCallApproval: this.toolCallApproval,
-      removeQueuedMessage: this.removeQueuedMessage,
-      reorderQueuedMessages: this.reorderQueuedMessages,
-      editQueuedMessage: this.editQueuedMessage,
-      toolCallPermissionDecision: this.toolCallPermissionDecision,
-      openToolCallPath: this.openToolCallPath,
+      toolCallCallbacks: this.toolCallCallbacks,
+      groupedToolCallCallbacks: this.groupedToolCallCallbacks,
+      queueMessageCallbacks: this.queueMessageCallbacks,
       registry: this.registry
     });
   };

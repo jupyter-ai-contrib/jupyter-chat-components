@@ -22,7 +22,7 @@ export type ToolCallApproval =
   | null;
 
 /**
- * The callback to submit a tool-call permission decision.
+ * The callback to submit a tool-call permission decision (grouped tool call component).
  */
 export type ToolCallPermissionDecision =
   | ((
@@ -31,6 +31,11 @@ export type ToolCallPermissionDecision =
       optionId: string
     ) => Promise<void> | void)
   | null;
+
+/**
+ * The callback to open a file or resource path referenced by a tool call (grouped tool call component).
+ */
+export type OpenToolCallPath = ((path: string) => void) | null;
 
 /**
  * The callback to remove a queued message.
@@ -54,9 +59,46 @@ export type EditQueuedMessage =
   | null;
 
 /**
- * The callback to open a file or resource path referenced by a tool call.
+ * Callbacks for the ToolCall component.
  */
-export type OpenToolCallPath = ((path: string) => void) | null;
+export interface IToolCallCallbacks {
+  /**
+   * The callback to approve or reject a tool.
+   */
+  toolCallApproval?: ToolCallApproval;
+}
+
+/**
+ * Callbacks for the GroupedToolCalls component.
+ */
+export interface IGroupedToolCallCallbacks {
+  /**
+   * The callback to submit a permission decision for grouped tool calls.
+   */
+  toolCallPermissionDecision?: ToolCallPermissionDecision;
+  /**
+   * The callback to open a path referenced by grouped tool calls.
+   */
+  openToolCallPath?: OpenToolCallPath;
+}
+
+/**
+ * Callbacks for the MessageQueue component.
+ */
+export interface IQueueMessageCallbacks {
+  /**
+   * The callback to remove a queued message.
+   */
+  removeQueuedMessage?: RemoveQueuedMessage;
+  /**
+   * The callback to reorder queued messages.
+   */
+  reorderQueuedMessages?: ReorderQueuedMessages;
+  /**
+   * The callback to edit the body of a queued message.
+   */
+  editQueuedMessage?: EditQueuedMessage;
+}
 
 /**
  * The interface for components renderer factory.
@@ -69,34 +111,19 @@ export interface IComponentsRendererFactory
   registry: IComponentRegistry;
 
   /**
-   * The callback to approve or reject a tool.
+   * Grouped callbacks for the ToolCall component.
    */
-  toolCallApproval: ToolCallApproval;
+  toolCallCallbacks?: IToolCallCallbacks;
 
   /**
-   * The callback to remove a queued message.
+   * Grouped callbacks for the GroupedToolCalls component.
    */
-  removeQueuedMessage: RemoveQueuedMessage;
+  groupedToolCallCallbacks?: IGroupedToolCallCallbacks;
 
   /**
-   * The callback to reorder queued messages.
+   * Grouped callbacks for the MessageQueue component.
    */
-  reorderQueuedMessages: ReorderQueuedMessages;
-
-  /**
-   * The callback to edit the body of a queued message.
-   */
-  editQueuedMessage: EditQueuedMessage;
-
-  /**
-   * The callback to submit a permission decision for grouped tool calls.
-   */
-  toolCallPermissionDecision: ToolCallPermissionDecision;
-
-  /**
-   * The callback to open a path referenced by grouped tool calls.
-   */
-  openToolCallPath: OpenToolCallPath;
+  queueMessageCallbacks?: IQueueMessageCallbacks;
 }
 
 /**

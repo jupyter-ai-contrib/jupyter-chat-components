@@ -2,7 +2,7 @@ import { TranslationBundle } from '@jupyterlab/translation';
 
 import * as React from 'react';
 
-import { IComponentProps, ToolCallApproval } from '../token';
+import { IComponentProps, IToolCallCallbacks } from '../token';
 
 /**
  * Configuration for rendering tool call status.
@@ -68,9 +68,8 @@ export interface IToolCallMetadata {
 /**
  * Options for building tool call HTML.
  */
-export interface IToolCallProps extends IComponentProps, IToolCallMetadata {
-  toolCallApproval?: ToolCallApproval;
-}
+export interface IToolCallProps
+  extends IComponentProps, IToolCallMetadata, IToolCallCallbacks {}
 
 export function escapeHtml(value: string): string {
   // Prefer the same native escaping approach used in JupyterLab itself
@@ -118,6 +117,8 @@ const getStatusText = (
  *
  * Renders a collapsible details element showing tool execution information
  * including input, output, and approval buttons if needed.
+ *
+ * @deprecated - the grouped tool call should be used instead.
  */
 export const ToolCall: React.FC<IToolCallProps> = ({
   toolName,

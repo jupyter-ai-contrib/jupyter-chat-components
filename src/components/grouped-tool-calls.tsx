@@ -7,6 +7,7 @@ import type { StructuredPatchHunk } from 'diff';
 
 import {
   IComponentProps,
+  IGroupedToolCallCallbacks,
   IToolCallDiff,
   IToolCallsEntry,
   IToolCallsMetadata,
@@ -46,10 +47,7 @@ interface IDiffLineInfo {
  * Props for rendering grouped tool calls.
  */
 export interface IGroupedToolCallsProps
-  extends IComponentProps, IToolCallsMetadata {
-  toolCallPermissionDecision?: ToolCallPermissionDecision;
-  openToolCallPath?: OpenToolCallPath;
-}
+  extends IComponentProps, IToolCallsMetadata, IGroupedToolCallCallbacks {}
 
 function getConfiguredServerRoot(): string | null {
   const rootUri = PageConfig.getOption('rootUri');

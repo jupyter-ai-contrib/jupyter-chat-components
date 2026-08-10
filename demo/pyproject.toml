@@ -5,7 +5,7 @@ description = "JupyterLite demo for jupyter-chat-components"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "jupyterlab>=4.5.0",
+    "jupyterlab>=4.5.10",
     "jupyterlite-core>=0.7.0",
     "jupyterlite-javascript-kernel>=0.4.0a1",
     "jupyter-chat-components",

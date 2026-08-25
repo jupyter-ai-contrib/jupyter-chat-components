@@ -692,6 +692,88 @@ test.describe('factory', () => {
           newBody: 'Updated message'
         });
       });
+
+      test('calls all registered callbacks when multiple are added', async ({
+        page
+      }) => {
+        await page.evaluate(() => {
+          (window as any).__callbackResults = [];
+          const app = (window as any).jupyterapp;
+          const factory = app?.pluginRegistry._plugins?.get(
+            'jupyter-chat-components:factory'
+          )?.service;
+          const d1 = factory.addCallbacks({
+            removeQueuedMessage: (targetId: string) => {
+              (window as any).__callbackResults.push('first:' + targetId);
+            }
+          });
+          const d2 = factory.addCallbacks({
+            removeQueuedMessage: (targetId: string) => {
+              (window as any).__callbackResults.push('second:' + targetId);
+            }
+          });
+          (window as any).__callbacksDisposable = {
+            dispose: () => {
+              d1.dispose();
+              d2.dispose();
+            }
+          };
+        });
+
+        await page.notebook.setCell(
+          0,
+          'code',
+          makeDisplayCode('message-queue', {
+            messages: [{ id: 'msg-1', body: 'Hello world' }],
+            targetId: 'queue-1'
+          })
+        );
+        await page.notebook.runCell(0, true);
+
+        await page.locator('.jp-chat-message-queue-bubble').hover();
+        await page.locator('.jp-chat-message-queue-remove').click();
+
+        const results = await page.evaluate(
+          () => (window as any).__callbackResults
+        );
+        expect(results).toEqual(['first:queue-1', 'second:queue-1']);
+      });
+
+      test('does not call a callback after its disposable is disposed', async ({
+        page
+      }) => {
+        await page.evaluate(() => {
+          (window as any).__callbackResult = null;
+          const app = (window as any).jupyterapp;
+          const factory = app?.pluginRegistry._plugins?.get(
+            'jupyter-chat-components:factory'
+          )?.service;
+          const disposable = factory.addCallbacks({
+            removeQueuedMessage: (targetId: string) => {
+              (window as any).__callbackResult = targetId;
+            }
+          });
+          disposable.dispose();
+        });
+
+        await page.notebook.setCell(
+          0,
+          'code',
+          makeDisplayCode('message-queue', {
+            messages: [{ id: 'msg-1', body: 'Hello world' }],
+            targetId: 'queue-1'
+          })
+        );
+        await page.notebook.runCell(0, true);
+
+        await page.locator('.jp-chat-message-queue-bubble').hover();
+        await page.locator('.jp-chat-message-queue-remove').click();
+
+        const result = await page.evaluate(
+          () => (window as any).__callbackResult
+        );
+        expect(result).toBeNull();
+      });
     });
   });
 });

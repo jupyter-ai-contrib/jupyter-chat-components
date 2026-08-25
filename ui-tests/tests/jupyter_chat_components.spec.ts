@@ -440,17 +440,9 @@ test.describe('factory', () => {
     });
 
     test.afterEach(async ({ page }) => {
-      // Clear all callbacks so they don't leak into subsequent tests.
       await page.evaluate(() => {
-        const app = (window as any).jupyterapp;
-        const factory = app?.pluginRegistry._plugins?.get(
-          'jupyter-chat-components:factory'
-        )?.service;
-        if (factory) {
-          factory.toolCallCallbacks = undefined;
-          factory.groupedToolCallCallbacks = undefined;
-          factory.queueMessageCallbacks = undefined;
-        }
+        (window as any).__callbacksDisposable?.dispose();
+        (window as any).__callbacksDisposable = null;
       });
       await page.notebook.close(true);
     });
@@ -465,7 +457,7 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.toolCallCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             toolCallApproval: (
               targetId: string,
               approvalId: string,
@@ -477,7 +469,7 @@ test.describe('factory', () => {
                 approve
               };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(
@@ -514,7 +506,7 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.toolCallCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             toolCallApproval: (
               targetId: string,
               approvalId: string,
@@ -526,7 +518,7 @@ test.describe('factory', () => {
                 approve
               };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(
@@ -565,7 +557,7 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.groupedToolCallCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             toolCallPermissionDecision: (
               targetId: string,
               toolCallId: string,
@@ -577,7 +569,7 @@ test.describe('factory', () => {
                 optionId
               };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(
@@ -625,11 +617,11 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.queueMessageCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             removeQueuedMessage: (targetId: string, messageId: string) => {
               (window as any).__callbackResult = { targetId, messageId };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(
@@ -660,7 +652,7 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.queueMessageCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             editQueuedMessage: (
               targetId: string,
               messageId: string,
@@ -672,7 +664,7 @@ test.describe('factory', () => {
                 newBody
               };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(

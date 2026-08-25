@@ -6,6 +6,8 @@ import { ReactWidget } from '@jupyterlab/ui-components';
 
 import { ReadonlyPartialJSONValue } from '@lumino/coreutils';
 
+import { DisposableDelegate, IDisposable } from '@lumino/disposable';
+
 import * as React from 'react';
 
 import {
@@ -19,6 +21,7 @@ import {
 import { ComponentRegistry } from './registry';
 
 import {
+  ICallbacks,
   IComponentRegistry,
   IComponentsRendererFactory,
   IGroupedToolCallCallbacks,
@@ -87,7 +90,7 @@ export class ComponentsRenderer
   }
 
   /**
-   * Render  into this widget's node.
+   * Render into this widget's node.
    */
   async renderModel(model: IRenderMime.IMimeModel): Promise<void> {
     this._data = model.data[this._mimeType] as string;
@@ -142,9 +145,7 @@ export class RendererFactory implements IComponentsRendererFactory {
   readonly defaultRank = 100;
   readonly registry: ComponentRegistry;
 
-  toolCallCallbacks?: IToolCallCallbacks;
-  groupedToolCallCallbacks?: IGroupedToolCallCallbacks;
-  queueMessageCallbacks?: IQueueMessageCallbacks;
+  private _callbacksList: ICallbacks[] = [];
 
   constructor() {
     this.registry = new ComponentRegistry();
@@ -155,12 +156,61 @@ export class RendererFactory implements IComponentsRendererFactory {
     this.registry.add('error', ErrorMessage);
   }
 
+  addCallbacks(callbacks: ICallbacks): IDisposable {
+    this._callbacksList.push(callbacks);
+    return new DisposableDelegate(() => {
+      const index = this._callbacksList.indexOf(callbacks);
+      if (index !== -1) {
+        this._callbacksList.splice(index, 1);
+      }
+    });
+  }
+
   createRenderer = (options: IRenderMime.IRendererOptions) => {
+    // Merge all the callbacks that target the same event, and group them per component.
+    const list = this._callbacksList;
+    const toolCallCallbacks: IToolCallCallbacks = {
+      toolCallApproval: (targetId, approvalId, approve) => {
+        for (const cb of list) {
+          cb.toolCallApproval?.(targetId, approvalId, approve);
+        }
+      }
+    };
+    const groupedToolCallCallbacks: IGroupedToolCallCallbacks = {
+      toolCallPermissionDecision: async (targetId, toolCallId, optionId) => {
+        for (const cb of list) {
+          await cb.toolCallPermissionDecision?.(targetId, toolCallId, optionId);
+        }
+      },
+      openToolCallPath: path => {
+        for (const cb of list) {
+          cb.openToolCallPath?.(path);
+        }
+      }
+    };
+    const queueMessageCallbacks: IQueueMessageCallbacks = {
+      removeQueuedMessage: (targetId, messageId) => {
+        for (const cb of list) {
+          cb.removeQueuedMessage?.(targetId, messageId);
+        }
+      },
+      reorderQueuedMessages: (targetId, messageIds) => {
+        for (const cb of list) {
+          cb.reorderQueuedMessages?.(targetId, messageIds);
+        }
+      },
+      editQueuedMessage: (targetId, messageId, newBody) => {
+        for (const cb of list) {
+          cb.editQueuedMessage?.(targetId, messageId, newBody);
+        }
+      }
+    };
+
     return new ComponentsRenderer({
       ...options,
-      toolCallCallbacks: this.toolCallCallbacks,
-      groupedToolCallCallbacks: this.groupedToolCallCallbacks,
-      queueMessageCallbacks: this.queueMessageCallbacks,
+      toolCallCallbacks,
+      groupedToolCallCallbacks,
+      queueMessageCallbacks,
       registry: this.registry
     });
   };

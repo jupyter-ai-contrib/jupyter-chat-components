@@ -4,6 +4,8 @@ import { TranslationBundle } from '@jupyterlab/translation';
 
 import { Token } from '@lumino/coreutils';
 
+import { IDisposable } from '@lumino/disposable';
+
 import * as React from 'react';
 
 /**
@@ -101,6 +103,15 @@ export interface IQueueMessageCallbacks {
 }
 
 /**
+ * All callbacks provided by the renderer factory, combining all component callback types.
+ */
+export interface ICallbacks
+  extends
+    IToolCallCallbacks,
+    IGroupedToolCallCallbacks,
+    IQueueMessageCallbacks {}
+
+/**
  * The interface for components renderer factory.
  */
 export interface IComponentsRendererFactory
@@ -111,19 +122,11 @@ export interface IComponentsRendererFactory
   registry: IComponentRegistry;
 
   /**
-   * Grouped callbacks for the ToolCall component.
+   * Add callbacks for chat components.
+   * Multiple extensions may add callbacks; all are called on each event.
+   * Dispose the returned object to remove the callbacks.
    */
-  toolCallCallbacks?: IToolCallCallbacks;
-
-  /**
-   * Grouped callbacks for the GroupedToolCalls component.
-   */
-  groupedToolCallCallbacks?: IGroupedToolCallCallbacks;
-
-  /**
-   * Grouped callbacks for the MessageQueue component.
-   */
-  queueMessageCallbacks?: IQueueMessageCallbacks;
+  addCallbacks(callbacks: ICallbacks): IDisposable;
 }
 
 /**

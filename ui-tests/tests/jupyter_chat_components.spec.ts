@@ -243,7 +243,7 @@ test.describe('jupyter-chat-components MIME renderer', () => {
               kind: 'delete',
               status: 'in_progress',
               permissionStatus: 'pending',
-              sessionId: 'session-1',
+              targetId: 'session-1',
               permissionOptions: [
                 { optionId: 'opt1', name: 'Allow once', kind: 'allow_once' },
                 { optionId: 'opt2', name: 'Deny', kind: 'reject' }
@@ -567,12 +567,12 @@ test.describe('factory', () => {
           )?.service;
           factory.groupedToolCallCallbacks = {
             toolCallPermissionDecision: (
-              sessionId: string,
+              targetId: string,
               toolCallId: string,
               optionId: string
             ) => {
               (window as any).__callbackResult = {
-                sessionId,
+                targetId,
                 toolCallId,
                 optionId
               };
@@ -591,7 +591,7 @@ test.describe('factory', () => {
                 kind: 'delete',
                 status: 'in_progress',
                 permissionStatus: 'pending',
-                sessionId: 'session-1',
+                targetId: 'session-1',
                 permissionOptions: [
                   { optionId: 'opt-allow', name: 'Allow', kind: 'allow_once' },
                   { optionId: 'opt-deny', name: 'Deny', kind: 'reject' }
@@ -608,7 +608,7 @@ test.describe('factory', () => {
           () => (window as any).__callbackResult
         );
         expect(result).toEqual({
-          sessionId: 'session-1',
+          targetId: 'session-1',
           toolCallId: 'tc-1',
           optionId: 'opt-allow'
         });

@@ -26,7 +26,7 @@ export type ToolCallApproval =
  */
 export type ToolCallPermissionDecision =
   | ((
-      sessionId: string,
+      targetId: string,
       toolCallId: string,
       optionId: string
     ) => Promise<void> | void)
@@ -257,9 +257,9 @@ export interface IToolCallsEntry {
    */
   selectedOptionId?: string;
   /**
-   * Session identifier used to route permission decisions.
+   * Target identifier used to route permission decisions and callbacks.
    */
-  sessionId?: string;
+  targetId?: string;
   /**
    * Optional inline file diffs associated with the tool call.
    */

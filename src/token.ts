@@ -375,3 +375,18 @@ export interface IMessageQueueMetadata {
   messages: IQueuedMessage[];
   targetId?: string;
 }
+
+/**
+ * Metadata for the audio player component.
+ */
+export interface IAudioPlayerMetadata {
+  /**
+   * The path of the audio file in the workspace.
+   */
+  path: string;
+  /**
+   * Optional duration of the audio recording in seconds.
+   */
+  duration?: number;
+}
+

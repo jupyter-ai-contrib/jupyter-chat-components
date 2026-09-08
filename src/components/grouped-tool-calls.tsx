@@ -577,7 +577,7 @@ function PermissionButtons({
 
   const canSubmit =
     !!toolCallPermissionDecision &&
-    !!toolCall.sessionId &&
+    !!toolCall.targetId &&
     !!toolCall.toolCallId;
 
   const handleClick = async (optionId: string) => {
@@ -589,7 +589,7 @@ function PermissionButtons({
 
     try {
       await toolCallPermissionDecision!(
-        toolCall.sessionId!,
+        toolCall.targetId!,
         toolCall.toolCallId,
         optionId
       );

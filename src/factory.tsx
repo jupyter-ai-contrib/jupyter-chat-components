@@ -171,37 +171,65 @@ export class RendererFactory implements IComponentsRendererFactory {
     const list = this._callbacksList;
     const toolCallCallbacks: IToolCallCallbacks = {
       toolCallApproval: (targetId, approvalId, approve) => {
-        for (const cb of list) {
-          cb.toolCallApproval?.(targetId, approvalId, approve);
+        for (const cb of [...list]) {
+          try {
+            cb.toolCallApproval?.(targetId, approvalId, approve);
+          } catch (e) {
+            console.error('toolCallApproval callback error', e);
+          }
         }
       }
     };
     const groupedToolCallCallbacks: IGroupedToolCallCallbacks = {
       toolCallPermissionDecision: async (targetId, toolCallId, optionId) => {
-        for (const cb of list) {
-          await cb.toolCallPermissionDecision?.(targetId, toolCallId, optionId);
+        for (const cb of [...list]) {
+          try {
+            await cb.toolCallPermissionDecision?.(
+              targetId,
+              toolCallId,
+              optionId
+            );
+          } catch (e) {
+            console.error('toolCallPermissionDecision callback error', e);
+          }
         }
       },
       openToolCallPath: path => {
-        for (const cb of list) {
-          cb.openToolCallPath?.(path);
+        for (const cb of [...list]) {
+          try {
+            cb.openToolCallPath?.(path);
+          } catch (e) {
+            console.error('openToolCallPath callback error', e);
+          }
         }
       }
     };
     const queueMessageCallbacks: IQueueMessageCallbacks = {
       removeQueuedMessage: (targetId, messageId) => {
-        for (const cb of list) {
-          cb.removeQueuedMessage?.(targetId, messageId);
+        for (const cb of [...list]) {
+          try {
+            cb.removeQueuedMessage?.(targetId, messageId);
+          } catch (e) {
+            console.error('removeQueuedMessage callback error', e);
+          }
         }
       },
       reorderQueuedMessages: (targetId, messageIds) => {
-        for (const cb of list) {
-          cb.reorderQueuedMessages?.(targetId, messageIds);
+        for (const cb of [...list]) {
+          try {
+            cb.reorderQueuedMessages?.(targetId, messageIds);
+          } catch (e) {
+            console.error('reorderQueuedMessages callback error', e);
+          }
         }
       },
       editQueuedMessage: (targetId, messageId, newBody) => {
-        for (const cb of list) {
-          cb.editQueuedMessage?.(targetId, messageId, newBody);
+        for (const cb of [...list]) {
+          try {
+            cb.editQueuedMessage?.(targetId, messageId, newBody);
+          } catch (e) {
+            console.error('editQueuedMessage callback error', e);
+          }
         }
       }
     };

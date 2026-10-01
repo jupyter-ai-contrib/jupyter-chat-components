@@ -873,3 +873,199 @@ details[open].jp-ai-tool-call-item summary::after,
   color: var(--jp-ui-font-color2);
   line-height: 1.4;
 }
+
+/* Premium Voice Recorder and Player Styling */
+
+@keyframes jp-ai-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(211, 47, 47, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(211, 47, 47, 0);
+  }
+}
+
+.jp-ai-mic-pulse {
+  animation: jp-ai-pulse 1.5s infinite;
+  background-color: var(--jp-error-color1) !important;
+  color: white !important;
+  border-radius: 50% !important;
+}
+
+.jp-ai-inline-recorder {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--jp-layout-color1);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 18px;
+  padding: 6px 16px;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
+  box-shadow: inset var(--jp-elevation-z1);
+}
+
+.jp-ai-recorder-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.jp-ai-recorder-timer {
+  font-family: var(--jp-code-font-family);
+  font-size: var(--jp-ui-font-size1);
+  color: var(--jp-ui-font-color1);
+  font-weight: 600;
+  min-width: 45px;
+}
+
+.jp-ai-wave-container {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 24px;
+  min-width: 60px;
+}
+
+.jp-ai-wave-bar {
+  width: 3px;
+  height: 4px;
+  background-color: var(--jp-error-color1);
+  border-radius: 2px;
+  transition: height 0.08s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fallback animation if Web Audio is not actively driving the height */
+.jp-ai-wave-bar.jp-ai-animating {
+  animation: jp-ai-wave-anim 1.2s ease-in-out infinite alternate;
+}
+
+.jp-ai-wave-bar.jp-ai-animating:nth-child(2) { animation-delay: 0.10s; }
+.jp-ai-wave-bar.jp-ai-animating:nth-child(3) { animation-delay: 0.20s; }
+.jp-ai-wave-bar.jp-ai-animating:nth-child(4) { animation-delay: 0.30s; }
+.jp-ai-wave-bar.jp-ai-animating:nth-child(5) { animation-delay: 0.40s; }
+.jp-ai-wave-bar.jp-ai-animating:nth-child(6) { animation-delay: 0.15s; }
+.jp-ai-wave-bar.jp-ai-animating:nth-child(7) { animation-delay: 0.25s; }
+.jp-ai-wave-bar.jp-ai-animating:nth-child(8) { animation-delay: 0.35s; }
+
+@keyframes jp-ai-wave-anim {
+  0% {
+    height: 4px;
+  }
+  100% {
+    height: 20px;
+  }
+}
+
+.jp-ai-audio-player {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--jp-layout-color2);
+  border: 1px solid var(--jp-border-color1);
+  border-radius: 12px;
+  margin: 6px 0;
+  box-shadow: var(--jp-elevation-z1);
+  max-width: 320px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.jp-ai-audio-play-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--jp-brand-color1, #2196F3);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.jp-ai-audio-play-btn:hover {
+  background: var(--jp-brand-color0, #1976D2);
+  transform: scale(1.05);
+}
+
+.jp-ai-audio-play-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+.jp-ai-audio-controls {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+}
+
+.jp-ai-audio-slider-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.jp-ai-audio-slider {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--jp-border-color2);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.jp-ai-audio-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--jp-brand-color1);
+}
+
+.jp-ai-audio-slider::-moz-range-thumb {
+  width: 10px;
+  height: 10px;
+  border: none;
+  border-radius: 50%;
+  background: var(--jp-brand-color1);
+}
+
+.jp-ai-audio-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--jp-ui-font-size0);
+  color: var(--jp-ui-font-color2);
+  font-family: var(--jp-code-font-family);
+}
+
+.jp-ai-audio-speed {
+  background: var(--jp-layout-color1);
+  border: 1px solid var(--jp-border-color2);
+  border-radius: 4px;
+  padding: 1px 4px;
+  font-size: var(--jp-ui-font-size0);
+  cursor: pointer;
+  color: var(--jp-ui-font-color1);
+  font-weight: 500;
+  transition: background-color 0.15s ease;
+}
+
+.jp-ai-audio-speed:hover {
+  background: var(--jp-layout-color2);
+}
+

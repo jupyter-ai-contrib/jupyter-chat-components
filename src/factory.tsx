@@ -15,7 +15,8 @@ import {
   InlineDiff,
   MessageQueue,
   ToolCall,
-  ErrorMessage
+  ErrorMessage,
+  AudioPlayer
 } from './components';
 
 import { ComponentRegistry } from './registry';
@@ -154,6 +155,7 @@ export class RendererFactory implements IComponentsRendererFactory {
     this.registry.add('inline-diff', InlineDiff);
     this.registry.add('message-queue', MessageQueue);
     this.registry.add('error', ErrorMessage);
+    this.registry.add('audio-player', AudioPlayer);
   }
 
   addCallbacks(callbacks: ICallbacks): IDisposable {

@@ -243,7 +243,7 @@ test.describe('jupyter-chat-components MIME renderer', () => {
               kind: 'delete',
               status: 'in_progress',
               permissionStatus: 'pending',
-              sessionId: 'session-1',
+              targetId: 'session-1',
               permissionOptions: [
                 { optionId: 'opt1', name: 'Allow once', kind: 'allow_once' },
                 { optionId: 'opt2', name: 'Deny', kind: 'reject' }
@@ -440,17 +440,9 @@ test.describe('factory', () => {
     });
 
     test.afterEach(async ({ page }) => {
-      // Clear all callbacks so they don't leak into subsequent tests.
       await page.evaluate(() => {
-        const app = (window as any).jupyterapp;
-        const factory = app?.pluginRegistry._plugins?.get(
-          'jupyter-chat-components:factory'
-        )?.service;
-        if (factory) {
-          factory.toolCallCallbacks = undefined;
-          factory.groupedToolCallCallbacks = undefined;
-          factory.queueMessageCallbacks = undefined;
-        }
+        (window as any).__callbacksDisposable?.dispose();
+        (window as any).__callbacksDisposable = null;
       });
       await page.notebook.close(true);
     });
@@ -465,7 +457,7 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.toolCallCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             toolCallApproval: (
               targetId: string,
               approvalId: string,
@@ -477,7 +469,7 @@ test.describe('factory', () => {
                 approve
               };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(
@@ -514,7 +506,7 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.toolCallCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             toolCallApproval: (
               targetId: string,
               approvalId: string,
@@ -526,7 +518,7 @@ test.describe('factory', () => {
                 approve
               };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(
@@ -565,19 +557,19 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.groupedToolCallCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             toolCallPermissionDecision: (
-              sessionId: string,
+              targetId: string,
               toolCallId: string,
               optionId: string
             ) => {
               (window as any).__callbackResult = {
-                sessionId,
+                targetId,
                 toolCallId,
                 optionId
               };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(
@@ -591,7 +583,7 @@ test.describe('factory', () => {
                 kind: 'delete',
                 status: 'in_progress',
                 permissionStatus: 'pending',
-                sessionId: 'session-1',
+                targetId: 'session-1',
                 permissionOptions: [
                   { optionId: 'opt-allow', name: 'Allow', kind: 'allow_once' },
                   { optionId: 'opt-deny', name: 'Deny', kind: 'reject' }
@@ -608,7 +600,7 @@ test.describe('factory', () => {
           () => (window as any).__callbackResult
         );
         expect(result).toEqual({
-          sessionId: 'session-1',
+          targetId: 'session-1',
           toolCallId: 'tc-1',
           optionId: 'opt-allow'
         });
@@ -625,11 +617,11 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.queueMessageCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             removeQueuedMessage: (targetId: string, messageId: string) => {
               (window as any).__callbackResult = { targetId, messageId };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(
@@ -660,7 +652,7 @@ test.describe('factory', () => {
           const factory = app?.pluginRegistry._plugins?.get(
             'jupyter-chat-components:factory'
           )?.service;
-          factory.queueMessageCallbacks = {
+          (window as any).__callbacksDisposable = factory.addCallbacks({
             editQueuedMessage: (
               targetId: string,
               messageId: string,
@@ -672,7 +664,7 @@ test.describe('factory', () => {
                 newBody
               };
             }
-          };
+          });
         });
 
         await page.notebook.setCell(
@@ -699,6 +691,88 @@ test.describe('factory', () => {
           messageId: 'msg-1',
           newBody: 'Updated message'
         });
+      });
+
+      test('calls all registered callbacks when multiple are added', async ({
+        page
+      }) => {
+        await page.evaluate(() => {
+          (window as any).__callbackResults = [];
+          const app = (window as any).jupyterapp;
+          const factory = app?.pluginRegistry._plugins?.get(
+            'jupyter-chat-components:factory'
+          )?.service;
+          const d1 = factory.addCallbacks({
+            removeQueuedMessage: (targetId: string) => {
+              (window as any).__callbackResults.push('first:' + targetId);
+            }
+          });
+          const d2 = factory.addCallbacks({
+            removeQueuedMessage: (targetId: string) => {
+              (window as any).__callbackResults.push('second:' + targetId);
+            }
+          });
+          (window as any).__callbacksDisposable = {
+            dispose: () => {
+              d1.dispose();
+              d2.dispose();
+            }
+          };
+        });
+
+        await page.notebook.setCell(
+          0,
+          'code',
+          makeDisplayCode('message-queue', {
+            messages: [{ id: 'msg-1', body: 'Hello world' }],
+            targetId: 'queue-1'
+          })
+        );
+        await page.notebook.runCell(0, true);
+
+        await page.locator('.jp-chat-message-queue-bubble').hover();
+        await page.locator('.jp-chat-message-queue-remove').click();
+
+        const results = await page.evaluate(
+          () => (window as any).__callbackResults
+        );
+        expect(results).toEqual(['first:queue-1', 'second:queue-1']);
+      });
+
+      test('does not call a callback after its disposable is disposed', async ({
+        page
+      }) => {
+        await page.evaluate(() => {
+          (window as any).__callbackResult = null;
+          const app = (window as any).jupyterapp;
+          const factory = app?.pluginRegistry._plugins?.get(
+            'jupyter-chat-components:factory'
+          )?.service;
+          const disposable = factory.addCallbacks({
+            removeQueuedMessage: (targetId: string) => {
+              (window as any).__callbackResult = targetId;
+            }
+          });
+          disposable.dispose();
+        });
+
+        await page.notebook.setCell(
+          0,
+          'code',
+          makeDisplayCode('message-queue', {
+            messages: [{ id: 'msg-1', body: 'Hello world' }],
+            targetId: 'queue-1'
+          })
+        );
+        await page.notebook.runCell(0, true);
+
+        await page.locator('.jp-chat-message-queue-bubble').hover();
+        await page.locator('.jp-chat-message-queue-remove').click();
+
+        const result = await page.evaluate(
+          () => (window as any).__callbackResult
+        );
+        expect(result).toBeNull();
       });
     });
   });
